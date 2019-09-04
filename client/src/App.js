@@ -1,5 +1,6 @@
 import React from 'react';
 import './App.css';
+import Playbox from './Playbox'
 
 function App() {
 
@@ -10,7 +11,7 @@ function App() {
       <header className="App-header">
         <a className="App-link" href="#" onClick={titleClick}>Session Link</a>
       </header>
-
+      <Playbox />
     </div>
   );
 }
