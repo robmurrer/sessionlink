@@ -3,7 +3,7 @@ import './App.css';
 
 function App() {
 
-  let titleClick = () => { console.log("huzzah"); };
+  const titleClick = () => { console.log("huzzah"); };
 
   return (
     <div className="App">
