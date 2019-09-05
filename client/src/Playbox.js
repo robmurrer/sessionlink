@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 
-//const URL = 'ws://localhost:5000';
-const URL = 'wss://sessionlink.herokuapp.com';
+const production = 'wss://sessionlink.herokuapp.com';
+const development = 'ws://localhost:5000';
+const URL = (process.env.NODE_ENV ? production : development);
 
 function get_random_color() {
 	  function c() {
@@ -20,9 +21,10 @@ class Playbox extends Component {
 		clicked: false,
 	};
 
-	ws = new WebSocket(URL); //is this state?
+	ws = null; 
 
-	componentDidMount() {
+	createWebSocket() {
+		this.ws = new WebSocket(URL);
 		this.ws.onopen = () => {
 			console.log('connected');
 		};
@@ -34,10 +36,14 @@ class Playbox extends Component {
 
 		this.ws.onclose = () => {
 			console.log('disconnected');
-			this.setState({
-				ws: new WebSocket(URL), //why do we have to set state here and not before?
-			});
+			this.ws = null;
+			this.createWebSocket();
 		};
+
+	}
+
+	componentDidMount() {
+		this.createWebSocket();
 	}
 
 	updateCursors(message) {
@@ -49,8 +55,10 @@ class Playbox extends Component {
 
 	sendCursorToServer(cursor_pos) {
 		const message = { name: this.state.name, x: cursor_pos.x, y: cursor_pos.y, color: this.state.color };
-		this.ws.send(JSON.stringify(message));
 		this.updateCursors(message);	
+
+		if (this.ws.readyState !== 1) return; //should we try to reconnect?
+		this.ws.send(JSON.stringify(message));
 	}
 	
 	move(evt) {
