@@ -1,7 +1,9 @@
 const express = require('express');
+const http = require('http');
 const path = require('path');
-const app = express();
+const WebSocket = require('ws');
 
+const app = express();
 app.use(express.static(path.join(__dirname, 'client/build')));
 
 app.get('*', (req, res) => {
@@ -9,10 +11,10 @@ app.get('*', (req, res) => {
 });
 
 const port = process.env.PORT || 5000;
-app.listen(port);
+const httpServer = http.createServer(app);
+//app.listen(port);
 
-const WebSocket = require('ws');
-const wss = new WebSocket.Server({ port: 3030 });
+const wss = new WebSocket.Server({ 'server': httpServer });
 
 wss.on('connection', function connection(ws) {
 	ws.on('message', function incoming(data) { 
@@ -22,4 +24,5 @@ wss.on('connection', function connection(ws) {
 	});
 });
 
+httpServer.listen(port);
 console.log('Session Link started...');
