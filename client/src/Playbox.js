@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 
-const URL = 'wss://localhost:3030'
+//const URL = 'ws://localhost:3030'
+const URL = 'wss://sessionlink.herokuapp.com:3030'
 
 function get_random_color() {
 	  function c() {
