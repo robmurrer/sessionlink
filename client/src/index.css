@@ -12,23 +12,3 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
-
-html, body, #root, .App, #playbox {
-  height: 100%;
-}
-
-#blackboard {
-  position:relative;
-  width: 100%;
-  height: 100%;
-  background-color: black;
-  color: white;
-}
-
-
-.player {
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  background-color: greenyellow;
-}

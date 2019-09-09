@@ -1,16 +1,24 @@
-html, body {
-  background-color: black;
-  color: white;
+html, body, #root, .App, #playbox, #blackboard
+{
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    background-color: black;
+    color: whitesmoke; 
 }
 
-.App-header {
-  background-color: #282c34;
-  display: flex;
-  flex-direction: column;
-  font-size: calc(10px + 2vmin);
-}
+#playbox {
+    position:relative;
+  }
+  
+  .block {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+  }
 
-.App-link {
-  color: #61dafb;
-}
-
+  h1 {
+    margin:0;
+    padding:0;
+  }
