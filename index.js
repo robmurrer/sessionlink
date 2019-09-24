@@ -71,7 +71,7 @@ WebSocketServer.on('connection', function connection(ws, request) {
 		rebound.block.server_ack = Date.now();
 
 		WebSocketServer.clients.forEach(function each(client_) {
-			if (client_.readyState === WebSocket.OPEN) client_.send(JSON.stringify(rebound));
+			if (client_ !== ws && client_.readyState === WebSocket.OPEN) client_.send(JSON.stringify(rebound));
 		});
 	});
 
