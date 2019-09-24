@@ -8,17 +8,30 @@ html, body, #root, .App, #playbox, #blackboard
     color: whitesmoke; 
 }
 
-#playbox {
-    position:relative;
-  }
-  
-  .block {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-  }
+div 
+{
+  margin: 0;
+  padding: 0; /* are these required */
+}
 
-  h1 {
-    margin:0;
-    padding:0;
-  }
+#playbox 
+{
+    position:relative;
+}
+  
+.block {
+  position: absolute;
+}
+
+h1 {
+  margin:0;
+  padding:0;
+  line-height:30px;
+}
+
+p {
+  height: 100%;
+  width: 100%;
+  text-align:center;
+  overflow: auto;
+}
