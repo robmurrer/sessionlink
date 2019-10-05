@@ -14,10 +14,10 @@ const uuid = require('uuid');
 const app = express();
 
 const SessionParser = session({
-	secret: (DEBUG ? 'hi mom!' : process.env.SERVER_KEY)
+	secret: (DEBUG ? 'hi mom and dad!' : process.env.SERVER_KEY)
 });
 
-app.use(SessionParser);
+//app.use(SessionParser);
 app.use(express.static(path.join(__dirname, 'client/build')));
 
 app.post('/login', function(req, res) {
@@ -33,9 +33,6 @@ app.get('/', (req, res) => {
 });
 
 // Wishlist server states/commands
-//client connected
-//client request_auth
-//client disconnect
 //client request_sync
 //client sync_complete
 //client change_key
@@ -45,7 +42,7 @@ app.get('/', (req, res) => {
 const HttpServer = http.createServer(app);
 const WebSocketServer = new WebSocket.Server({ noServer: true}); 
 
-setInterval(
+if (DEBUG) setInterval(
 	function heartbeat() {
 		let client_count = 0;
 		WebSocketServer.clients.forEach(function each(client_) {
@@ -81,12 +78,14 @@ WebSocketServer.on('connection', function connection(ws, request) {
 HttpServer.on('upgrade', function(request, socket, head) {
 	if (DEBUG) console.log("^ Upgraded Websocket Connection")
 
+	/*
 	SessionParser(request, {}, () => {
 		if (!request.session || !request.session.userId) {
 			socket.destroy();
 			return;
 		}
 	});
+	*/
 
 	WebSocketServer.handleUpgrade(request, socket, head, function(ws) {
 		if (DEBUG) console.log('x Upgrading...');
