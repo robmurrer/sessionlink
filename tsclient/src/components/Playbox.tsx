@@ -11,26 +11,40 @@ export interface PlayboxState {
     block: BlockProps
 };
 
-enum Command {
+export enum Command {
     Update,
     Delete,
 }
 
 
-function LoadState(props : PlayboxProps) {
-    let state : PlayboxState = { block: props.block };
+//todo load state from indexedb based on block id
+function LoadState(props: PlayboxProps) {
+    let state: PlayboxState = { block: props.block };
 
     return state;
 }
 
 export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
-    readonly state : PlayboxState = LoadState(this.props);
+    readonly state: PlayboxState = LoadState(this.props);
     BlackboardRef = React.createRef<HTMLDivElement>();
 
-    Commando(updated_block : BlockProps, command : Command) {
+    //command function that is passed to all blocks and they call this
+    //default command is update
+    Commando(updated_block: BlockProps, command: Command = Command.Update) {
         let block = {...this.state.block};
         if (!block.blocks) block.blocks = {};
-        block.blocks[updated_block.id] = updated_block;
+        
+        switch (command) {
+            case Command.Update:
+                block.blocks[updated_block.id] = updated_block;
+                break;
+            case Command.Delete:
+                delete block.blocks[updated_block.id]
+                break;
+            default:
+                console.log("! Unknown command type");
+                break;
+        }
 
         this.setState({block})
     }
@@ -42,6 +56,8 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
         this.setState({block});
     }
 
+    //todo center on mouse with width of default block (at top left right now)
+    //know the highest z-index and increment it so that new blocks are always on top?
     handleClick(event : React.MouseEvent) {
         const blackboard = this.BlackboardRef.current;
         if (!blackboard) return;
@@ -50,7 +66,7 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
         const new_block : BlockProps = {
             id: uuid(),
             title: "Untitled",
-            value: Date.now(),
+            value: "Content...",
             x: event.clientX - rel_pos.left,
             y: event.clientY - rel_pos.top,
         };
@@ -63,7 +79,7 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
         this.setState({block}); 
     }
 
-    //critical
+    //critical to prevent browser from snapping back drag on block
     handleDrag(event: React.DragEvent) {
         event.preventDefault();
     }
@@ -90,7 +106,11 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
         return (
             <div className="Playbox">
                 <h1>
-                    <ContentEditable.default html={this.state.block.title || ""} onChange={this.handleTitleEdit.bind(this)} /></h1>
+                    <ContentEditable.default 
+                        html={String(this.state.block.title) || ""} 
+                        onChange={this.handleTitleEdit.bind(this)} 
+                    />
+                </h1>
                 <div 
                     ref={this.BlackboardRef} 
                     className="Blackboard" 
@@ -98,9 +118,10 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
                     onDragOver={this.handleDrag.bind(this)}
                     onDrop={this.handleDrop.bind(this)}>
                         {Object.entries(blocks).map(([key, b]) => {
-                            return <Block key={b.id} {...b} blackboard={this.BlackboardRef.current || undefined} commando={this.Commando.bind(this)} />;
+                            return <Block key={b.id} {...b} commando={this.Commando.bind(this)} />;
                         })}
                 </div>
+                {this.props.children}
             </div>
         );
     }
