@@ -6,12 +6,23 @@ export interface BlockProps {
     id: string;
     title?: string;
     value?: any;
-    color?: string;
+    created?: number;
+
+    // Geometry
     x?: number; 
     y?: number; 
     z?: number; 
-    blocks? : {[key: string] : BlockProps},
+
+    // Colors
+    color?: string;
+    bg_color?: string;
+
+    // Update callback :)
     commando?: Function,
+
+    // Like Children but dictionary database
+    // only used for root blocks right now
+    blocks?: {[key: string] : BlockProps},
 };
 
 export class Block extends React.Component<BlockProps> {
@@ -50,18 +61,39 @@ export class Block extends React.Component<BlockProps> {
         return (
             <div 
                 className="Block" 
-                style={{left: this.props.x, top: this.props.y, color: this.props.color}}
+                style={{
+                    left: this.props.x, 
+                    top: this.props.y, 
+                    color: this.props.color,
+                    borderColor: this.props.color,
+                }}
+
                 draggable={true}
                 onClick={this.handleClick.bind(this)}
                 onDragStart={this.handleDragStart.bind(this)}
             >
                 <h1>
-                    <ContentEditable.default html={String(this.props.title) || ""} onChange={this.handleTitleEdit.bind(this)} />
+                    <ContentEditable.default 
+                        html={String(this.props.title || "")} 
+                        onChange={this.handleTitleEdit.bind(this)} 
+                    />
                 </h1>
-                <div><ContentEditable.default html={String(this.props.value) || ""} onChange={this.handleValueEdit.bind(this)}/></div>
-                <div className="BlockControls">
-                    <button className="DeleteButton" onClick={this.handleDelete.bind(this)}>Delete</button>
+                <hr/>
+                <div className="Content">
+                    <ContentEditable.default 
+                        html={String(this.props.value) || ""} //guard value can be any?
+                        onChange={this.handleValueEdit.bind(this)}
+                    />
                 </div>
+                <div className="Controls">
+                    <button 
+                        className="DeleteButton" 
+                        onClick={this.handleDelete.bind(this)}
+                    >
+                        Delete
+                    </button>
+                </div>
+
                 {this.props.children}
             </div>
         );

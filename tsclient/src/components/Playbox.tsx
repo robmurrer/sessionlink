@@ -67,6 +67,10 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
             id: uuid(),
             title: "Untitled",
             value: "Content...",
+            created: Date.now(),
+
+            color: "Yellow",
+
             x: event.clientX - rel_pos.left,
             y: event.clientY - rel_pos.top,
         };

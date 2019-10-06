@@ -1,6 +1,8 @@
 html, body, #root, .App {
   height: 100%;
   width: 100%;
+  background-color: black;
+  color: yellow;
 }
 
 .Playbox, .Blackboard {
@@ -11,8 +13,14 @@ html, body, #root, .App {
 
 .Block {
   position: absolute;
-  outline: 1px solid black;
+  padding: 10px;
+  min-width: 300px;
 }
+
+.Block .Content {
+  padding-bottom:30px;
+}
+
 
 
 /* hack for safari content editing :( */

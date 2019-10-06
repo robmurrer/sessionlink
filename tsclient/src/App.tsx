@@ -7,9 +7,14 @@ import uuid from 'uuid/v4';
 
 const App: React.FC = () => {
 
-  let b0 : BlockProps = {
+  //parse url for id param
+  //if none do welcome id
+  //prepopulate welcome block props in indexedb
+
+  let b0: BlockProps = {
     id: uuid(), 
-    title: "Untitled",
+    title: "Welcome Click Anywhere to Make a Note",
+    created: Date.now(),
   };
 
   return (
