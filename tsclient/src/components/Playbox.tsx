@@ -63,8 +63,24 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
         this.setState({block}); 
     }
 
+    //critical
     handleDrag(event: React.DragEvent) {
         event.preventDefault();
+    }
+
+    handleDrop(event: React.DragEvent) {
+        let block = {...this.state.block};
+
+        if (!block.blocks) return; //never going to happen, but typescript :)
+        if (!this.BlackboardRef.current) return;
+
+        const block_id = event.dataTransfer.getData("text/plain");
+        const rel_pos = this.BlackboardRef.current.getBoundingClientRect();
+        
+        block.blocks[block_id].x = event.clientX - rel_pos.left;
+        block.blocks[block_id].y = event.clientY - rel_pos.top;
+
+        this.setState({block}); 
     }
 
     render() {
@@ -75,10 +91,15 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
             <div className="Playbox">
                 <h1>
                     <ContentEditable.default html={this.state.block.title || ""} onChange={this.handleTitleEdit.bind(this)} /></h1>
-                <div ref={this.BlackboardRef} className="Blackboard" onClick={this.handleClick.bind(this)} onDragOver={this.handleDrag.bind(this)}>
-                    {Object.entries(blocks).map(([key, b]) => {
-                        return <Block key={b.id} {...b} blackboard={this.BlackboardRef.current || undefined} commando={this.Commando.bind(this)} />;
-                    })}
+                <div 
+                    ref={this.BlackboardRef} 
+                    className="Blackboard" 
+                    onClick={this.handleClick.bind(this)} 
+                    onDragOver={this.handleDrag.bind(this)}
+                    onDrop={this.handleDrop.bind(this)}>
+                        {Object.entries(blocks).map(([key, b]) => {
+                            return <Block key={b.id} {...b} blackboard={this.BlackboardRef.current || undefined} commando={this.Commando.bind(this)} />;
+                        })}
                 </div>
             </div>
         );

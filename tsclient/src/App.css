@@ -13,3 +13,10 @@ html, body, #root, .App {
   position: absolute;
   outline: 1px solid black;
 }
+
+
+/* hack for safari content editing :( */
+[contenteditable] {
+    -webkit-user-select: text;
+    user-select: text;
+}

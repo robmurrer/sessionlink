@@ -18,28 +18,15 @@ export interface BlockProps {
 export class Block extends React.Component<BlockProps> {
 
     handleClick(event : React.MouseEvent) {
-        console.log("clicked on box");
+        //console.log("clicked on box");
         event.stopPropagation();
     }
 
-    //not using this for now
-    handleDrop(event : React.DragEvent) {
-    }
-
     handleDragStart(event : React.DragEvent) {
+        let dt = event.dataTransfer;
+        dt.setData("text/plain", this.props.id);
     }
 
-    handleDragEnd(event : React.DragEvent) {
-        if (!this.props.blackboard) return;
-        if (!this.props.commando) return;
-
-        const rel_pos = this.props.blackboard.getBoundingClientRect();
-        let updated_block = {...this.props};
-        updated_block.x = event.clientX - rel_pos.left;
-        updated_block.y = event.clientY - rel_pos.top;
-
-        this.props.commando(updated_block);
-    }
 
     handleTitleEdit(event: ContentEditable.ContentEditableEvent) {
         if (!this.props.commando) return;
@@ -56,11 +43,11 @@ export class Block extends React.Component<BlockProps> {
                 style={{left: this.props.x, top: this.props.y, color: this.props.color}}
                 draggable={true}
                 onClick={this.handleClick.bind(this)}
-                onDrop={this.handleDrop.bind(this)}
                 onDragStart={this.handleDragStart.bind(this)}
-                onDragEnd={this.handleDragEnd.bind(this)}
             >
-                <h1><ContentEditable.default html={this.props.title || ""} onChange={this.handleTitleEdit.bind(this)}/></h1>
+                <h1>
+                    <ContentEditable.default html={this.props.title || ""} onChange={this.handleTitleEdit.bind(this)} />
+                </h1>
                 <p>{this.props.value}</p>
                 {this.props.children}
             </div>
