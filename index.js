@@ -18,7 +18,7 @@ const SessionParser = session({
 });
 
 //app.use(SessionParser);
-app.use(express.static(path.join(__dirname, 'client/build')));
+app.use(express.static(path.join(__dirname, 'tsclient/build')));
 
 app.post('/login', function(req, res) {
 	const id = uuid.v4();
