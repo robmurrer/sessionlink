@@ -7,15 +7,20 @@ import uuid from 'uuid/v4';
 
 const App: React.FC = () => {
 
-  //parse url for id param
-  //if none do welcome id
-  //prepopulate welcome block props in indexedb
+  const url = new URL(document.URL);
+  let id = url.searchParams.get('id');
+
+  if (id === null) {
+    id = uuid(); 
+    window.location.href = window.location.href + "?id=" + id;
+  }
 
   let b0: BlockProps = {
-    id: uuid(), 
-    title: "Welcome Click Anywhere to Make a Note",
-    created: Date.now(),
+    id: id, 
+    title: "hi mom, hi dad!",
+    value: "Love you jess",
   };
+
 
   return (
     <div className="App"> 

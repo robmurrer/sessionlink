@@ -1,132 +1,234 @@
+/*  Playbox React Component
+    Copyright 2019 Rob Murrer - All Rights Reserved
+    No Warranty - Not Fit for Public Consumption
+
+    Pass in Root Block and Watch it Go.
+*/
 import * as React from "react";
-import { Block, BlockProps } from "./Block";
 import * as ContentEditable from "react-contenteditable";
 import uuid from "uuid";
+import * as localForage from "localforage";
+
+import { FileDrop, } from "./FileDrop";
+import { Block, BlockProps } from "./Block";
+import { ReadAfterDestroyedError } from "fs-capacitor";
+import { identifier } from "@babel/types";
+import { string } from "prop-types";
 
 export interface PlayboxProps {
-    block: BlockProps
+    block: BlockProps,
 };
 
+enum PlayboxStates {
+    HYDRATING, //serialize from local copy... kids these days
+    OFFLINE_SERVER, 
+    CONNECTING_SERVER,
+    SYNCING_SERVER,
+    REBOUND_SERVER,
+    ERROR,
+}
+
 export interface PlayboxState {
-    block: BlockProps
+    state: PlayboxStates,
+    root_block: BlockProps,
+    store: LocalForage,
+    blocks: {[key: string]: BlockProps},
+    offline: boolean,
+    //next_x: number,
+    //next_y: number,
+    cursor_x?: number,
+    cursor_y?: number,
+    selected_block?: string,
 };
 
 export enum Command {
+    Init,
     Update,
     Delete,
+    Archive,
 }
 
+const PUSH_X = 300;
+const OFFSET_XY = 30;
+function GetDefaultState(props: PlayboxProps) {
 
-//todo load state from indexedb based on block id
-function LoadState(props: PlayboxProps) {
-    let state: PlayboxState = { block: props.block };
+    let state: PlayboxState = { 
+        state: PlayboxStates.HYDRATING,
+        root_block: props.block,
+        blocks: {},
+        store: localForage.createInstance({name: props.block.id}),
+        //next_x: OFFSET_XY, 
+        //next_y: OFFSET_XY,
+        offline: true,
+    };
+
+    state.root_block.title = state.root_block.title || "";
 
     return state;
 }
 
-export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
-    readonly state: PlayboxState = LoadState(this.props);
-    BlackboardRef = React.createRef<HTMLDivElement>();
 
-    //command function that is passed to all blocks and they call this
-    //default command is update
-    Commando(updated_block: BlockProps, command: Command = Command.Update) {
-        let block = {...this.state.block};
-        if (!block.blocks) block.blocks = {};
-        
-        switch (command) {
-            case Command.Update:
-                block.blocks[updated_block.id] = updated_block;
-                break;
-            case Command.Delete:
-                delete block.blocks[updated_block.id]
-                break;
-            default:
-                console.log("! Unknown command type");
-                break;
+
+export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
+    BlackboardRef = React.createRef<HTMLDivElement>();
+    RootBlockTitle = React.createRef<HTMLElement>();
+    SelectedBlock = React.createRef<HTMLElement>(); 
+
+    constructor(props: PlayboxProps) {
+        super(props);
+        this.state = GetDefaultState(this.props);
+    }
+
+    DehydrateBlock(block: BlockProps) {
+        let new_block = block;
+        delete new_block.commando; //cannot clone with function props
+        this.state.store.setItem(block.id, block);
+    }
+
+    async HydrateBlock(id: string) {
+        let result: {[key:string]: BlockProps} = {};
+        let blockchain: BlockProps = {id: id, blocks: []}; 
+
+        try {
+            blockchain = await this.state.store.getItem(id) as BlockProps;
+        }
+        catch {
+            console.log("! block not in store")
         }
 
-        this.setState({block})
+        if (!blockchain) {
+            blockchain = {
+                id: id,
+                title: "Untitled",
+                blocks: [],
+            }
+        }
+
+        result[id] = blockchain;
+
+        if (blockchain.blocks) {
+            for (let i=0; i<blockchain.blocks.length; i++) {
+                let children = await this.HydrateBlock(blockchain.blocks[i]);
+                result = Object.assign({}, result, children);
+            }
+        }
+        return result;
+    }
+
+
+    async componentDidMount() {
+        let new_state = {...this.state};
+
+        new_state.blocks = await this.HydrateBlock(new_state.root_block.id);
+        new_state.root_block = new_state.blocks[new_state.root_block.id];
+
+        //remove root block from blockchain!
+        console.log(new_state);
+        delete new_state.blocks[new_state.root_block.id];
+
+        this.setState(new_state);
+
+        //select root block's title
+        if (this.RootBlockTitle.current === null) return
+        this.RootBlockTitle.current.focus();
     }
 
     handleTitleEdit(event: ContentEditable.ContentEditableEvent) {
         let new_title = event.target.value;
-        let block = {...this.state.block};
-        block.title = new_title;
-        this.setState({block});
+        let state = {...this.state};
+        state.root_block.title = new_title;
+        this.setState(state);
+        this.DehydrateBlock(state.root_block);
     }
 
-    //todo center on mouse with width of default block (at top left right now)
-    //know the highest z-index and increment it so that new blocks are always on top?
-    handleClick(event : React.MouseEvent) {
-        const blackboard = this.BlackboardRef.current;
-        if (!blackboard) return;
-        
-        const rel_pos = blackboard.getBoundingClientRect();
-        const new_block : BlockProps = {
+    highlightTitle() {
+        setTimeout(() => { document.execCommand('selectAll', false)}, 0);
+    }
+
+    handleAddBlockLink(event: React.MouseEvent) {
+        console.log("Add block");
+        event.preventDefault();
+
+        let state = {...this.state};
+
+        let new_block: BlockProps = {
             id: uuid(),
             title: "Untitled",
-            value: "Content...",
-            created: Date.now(),
+            value: "Write something good...", 
+            //x: state.next_x,
+            //y: state.next_y,
+        }
 
-            color: "Yellow",
+        state.selected_block = new_block.id;
 
-            x: event.clientX - rel_pos.left,
-            y: event.clientY - rel_pos.top,
-        };
-    
-        let block = {...this.state.block};
-        if (!block.blocks) block.blocks = {};
+        if (!state.root_block.blocks) state.root_block.blocks = [];
+        state.root_block.blocks.push(new_block.id);
 
-        block.blocks[new_block.id] = new_block;
+        if (!state.blocks) state.blocks = {};
+        state.blocks[new_block.id] = new_block;
 
-        this.setState({block}); 
+        //state.next_x = state.next_x + PUSH_X;
+
+        this.setState(state);
+        this.DehydrateBlock(new_block);
+        this.DehydrateBlock(state.root_block)
+
+        if (this.SelectedBlock.current !== null) {
+            this.SelectedBlock.current.focus();
+        }
     }
 
-    //critical to prevent browser from snapping back drag on block
-    handleDrag(event: React.DragEvent) {
-        event.preventDefault();
+    handleClick(event: React.MouseEvent) {
+        console.log("Click");
+
     }
 
-    handleDrop(event: React.DragEvent) {
-        let block = {...this.state.block};
+    handleCommando(block: BlockProps, command: Command = Command.Update) {
+        //console.log("Commando!");
+        let state = {...this.state};
 
-        if (!block.blocks) return; //never going to happen, but typescript :)
-        if (!this.BlackboardRef.current) return;
+        switch (command) {
+            case Command.Update:
+                state.blocks[block.id] = block;
+                this.DehydrateBlock(block);
+            break;
+        }
 
-        const block_id = event.dataTransfer.getData("text/plain");
-        const rel_pos = this.BlackboardRef.current.getBoundingClientRect();
-        
-        block.blocks[block_id].x = event.clientX - rel_pos.left;
-        block.blocks[block_id].y = event.clientY - rel_pos.top;
-
-        this.setState({block}); 
+        this.setState(state);
     }
 
     render() {
-        let blocks: {[key: string]: BlockProps} = {};
-        if (this.state.block.blocks) blocks = this.state.block.blocks;
-
         return (
-            <div className="Playbox">
-                <h1>
-                    <ContentEditable.default 
-                        html={String(this.state.block.title) || ""} 
-                        onChange={this.handleTitleEdit.bind(this)} 
-                    />
-                </h1>
-                <div 
-                    ref={this.BlackboardRef} 
-                    className="Blackboard" 
-                    onClick={this.handleClick.bind(this)} 
-                    onDragOver={this.handleDrag.bind(this)}
-                    onDrop={this.handleDrop.bind(this)}>
-                        {Object.entries(blocks).map(([key, b]) => {
-                            return <Block key={b.id} {...b} commando={this.Commando.bind(this)} />;
-                        })}
+            <FileDrop store={this.state.store}>
+                <div className="Playbox">
+                    <h1>
+                        <ContentEditable.default 
+                            innerRef={this.RootBlockTitle}
+                            html={this.state.root_block.title || ""}
+                            onChange={this.handleTitleEdit.bind(this)} 
+                            onFocus={this.highlightTitle.bind(this)}
+                        />
+                    </h1>
+                    <div className="Plusbar">
+                        <a onClick={this.handleAddBlockLink.bind(this)} href="">+</a>
+                    </div>
+                    <hr/>
+                    <div ref={this.BlackboardRef} className="Blackboard" onClick={this.handleClick.bind(this)}>
+                            {Object.entries(this.state.blocks || {}).map(([key, b]) => {
+                                let ref = null;
+                                let selected = false;
+                                if (this.state.selected_block !== null) {
+                                   if (b.id === this.state.selected_block) {
+                                        ref = this.SelectedBlock;
+                                        selected = true;
+                                   } 
+                                }
+                                return <Block innerRef={ref} selected={selected} key={b.id} {...b} commando={this.handleCommando.bind(this)}/>;
+                            })}
+                    </div>
+                    {this.props.children}
                 </div>
-                {this.props.children}
-            </div>
+            </FileDrop>
         );
     }
 }

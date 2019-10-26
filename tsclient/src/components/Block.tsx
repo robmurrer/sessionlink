@@ -7,6 +7,7 @@ export interface BlockProps {
     title?: string;
     value?: any;
     created?: number;
+    updated?: number;
 
     // Geometry
     x?: number; 
@@ -15,17 +16,22 @@ export interface BlockProps {
 
     // Colors
     color?: string;
-    bg_color?: string;
 
     // Update callback :)
     commando?: Function,
 
-    // Like Children but dictionary database
-    // only used for root blocks right now
-    blocks?: {[key: string] : BlockProps},
+    //blocks under management
+    blocks?: string[],
+
+    innerRef?: React.RefObject<HTMLElement> | Function | null;
+
+    selected?: boolean;
 };
 
 export class Block extends React.Component<BlockProps> {
+    highlightContent() { 
+        setTimeout(() => { document.execCommand('selectAll', false)}, 0);
+    }
 
     //we don't want Playbox to add another block at cursor click
     handleClick(event : React.MouseEvent) {
@@ -52,30 +58,37 @@ export class Block extends React.Component<BlockProps> {
         this.props.commando(updated_block);
     }
 
+    handleArchive(event: React.MouseEvent) {
+        if (!this.props.commando) return;
+        this.props.commando(this.props, Command.Archive)
+    }
+
     handleDelete(event: React.MouseEvent) {
         if (!this.props.commando) return;
         this.props.commando(this.props, Command.Delete)
     }
-
     render() {
         return (
             <div 
                 className="Block" 
                 style={{
-                    left: this.props.x, 
-                    top: this.props.y, 
+                    //left: this.props.x, 
+                    //top: this.props.y, 
                     color: this.props.color,
-                    borderColor: this.props.color,
+                    border: "1px solid " + this.props.color,
+                    float: "left",
                 }}
 
-                draggable={true}
+                //draggable={true}
                 onClick={this.handleClick.bind(this)}
                 onDragStart={this.handleDragStart.bind(this)}
+                onFocus={this.highlightContent.bind(this)}
             >
                 <h1>
                     <ContentEditable.default 
                         html={String(this.props.title || "")} 
                         onChange={this.handleTitleEdit.bind(this)} 
+                        onFocus={this.highlightContent.bind(this)}
                     />
                 </h1>
                 <hr/>
@@ -83,14 +96,21 @@ export class Block extends React.Component<BlockProps> {
                     <ContentEditable.default 
                         html={String(this.props.value) || ""} //guard value can be any?
                         onChange={this.handleValueEdit.bind(this)}
+                        onFocus={this.highlightContent.bind(this)}
                     />
                 </div>
-                <div className="Controls">
+                <div style={{display: "none"}} className="Controls">
+                    <button 
+                        className="ArchiveButton" 
+                        onClick={this.handleArchive.bind(this)}
+                    >
+                        Archive
+                    </button>
                     <button 
                         className="DeleteButton" 
                         onClick={this.handleDelete.bind(this)}
                     >
-                        Delete
+                        Delete 
                     </button>
                 </div>
 

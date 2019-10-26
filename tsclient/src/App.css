@@ -2,7 +2,7 @@ html, body, #root, .App {
   height: 100%;
   width: 100%;
   background-color: black;
-  color: yellow;
+  color: white;
 }
 
 .Playbox, .Blackboard {
@@ -11,17 +11,52 @@ html, body, #root, .App {
   height: 100%;
 }
 
+.Playbox h1 {
+  float:left;
+  margin: 0;
+  padding: 0;
+  margin-left:10px;
+  font-size: 30px;
+  color: lightskyblue;
+}
+
+
+.Playbox .Plusbar {
+  float:left;
+  border-left: 1px solid white;
+  margin-left: 10px;
+  padding-left: 10px;
+  font-size: 30px;
+  line-height: 30px;
+  margin-top: 5px;
+}
+
+.Plusbar a {
+  color: lightskyblue;
+  text-decoration: none; 
+  display:block;
+  margin-top: -5px;
+}
+
+.Playbox hr {
+  clear: both;
+}
+
 .Block {
-  position: absolute;
   padding: 10px;
-  min-width: 300px;
+  background-color: black;
+  max-width: 900px;
+  font-size: 18px;
+}
+
+.Block h1 {
+  padding:0;
+  margin:0;
 }
 
 .Block .Content {
   padding-bottom:30px;
 }
-
-
 
 /* hack for safari content editing :( */
 [contenteditable] {
