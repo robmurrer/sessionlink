@@ -7,14 +7,15 @@
     "@types/node": "12.7.8",
     "@types/react": "16.9.4",
     "@types/react-dom": "16.9.1",
+    "@types/uuid": "^3.4.5",
+    "fs-capacitor": "^2.0.4",
     "idb": "^4.0.5",
     "localforage": "^1.7.3",
     "react": "^16.10.1",
     "react-contenteditable": "^3.3.2",
     "react-dom": "^16.10.1",
     "react-scripts": "3.1.2",
-    "typescript": "3.6.3",
-    "@types/uuid": "^3.4.5"
+    "typescript": "3.6.3"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -37,6 +38,5 @@
       "last 1 safari version"
     ]
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }
