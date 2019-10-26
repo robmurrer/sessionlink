@@ -2,8 +2,11 @@
   "name": "server",
   "version": "0.0.0",
   "private": true,
+  "engines": {
+	  "node": "11"
+  },
   "scripts": {
-    "start": "cd client && npm run build && cd .. && node index.js",
+    "start": "cd tsclient && npm run build && cd .. && node index.js",
     "heroku-postbuild": "cd tsclient && npm install && npm run build"
   },
   "dependencies": {
