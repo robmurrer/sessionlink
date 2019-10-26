@@ -29,7 +29,7 @@ app.post('/login', function(req, res) {
 
 app.get('/', (req, res) => {
 	//if (DEBUG) console.log(req);
-	res.sendFile(path.join(__dirname+'/client/build/index.html'));
+	res.sendFile(path.join(__dirname+'/tsclient/build/index.html'));
 });
 
 // Wishlist server states/commands
