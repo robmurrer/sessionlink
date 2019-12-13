@@ -4,16 +4,16 @@
 
     Pass in Root Block and Watch it Go.
 */
-import * as React from "react";
-import * as ContentEditable from "react-contenteditable";
-import uuid from "uuid";
-import * as localForage from "localforage";
+import * as React from "react"
+import * as ContentEditable from "react-contenteditable"
+import uuid from "uuid"
+import * as localForage from "localforage"
 
-import { FileDrop, } from "./FileDrop";
-import { Block, BlockProps } from "./Block";
-import { ReadAfterDestroyedError } from "fs-capacitor";
-import { identifier } from "@babel/types";
-import { string } from "prop-types";
+import { FileDrop, } from "./FileDrop"
+import { Block, BlockProps } from "./Block"
+import { Cursor } from "./Cursor"
+
+import { SocketMessage, SocketCommand, SocketCommandType } from "./SocketMessage"
 
 export interface PlayboxProps {
     block: BlockProps,
@@ -21,11 +21,15 @@ export interface PlayboxProps {
 
 enum PlayboxStates {
     HYDRATING, //serialize from local copy... kids these days
-    OFFLINE_SERVER, 
-    CONNECTING_SERVER,
+    DISCONNECTED_SERVER,
+    CONNECTED_SERVER,
     SYNCING_SERVER,
-    REBOUND_SERVER,
     ERROR,
+}
+
+interface Point {
+    x: number,
+    y: number
 }
 
 export interface PlayboxState {
@@ -34,16 +38,24 @@ export interface PlayboxState {
     store: LocalForage,
     blocks: {[key: string]: BlockProps},
     offline: boolean,
-    //next_x: number,
-    //next_y: number,
+    next_x?: number,
+    next_y?: number,
     cursor_x?: number,
     cursor_y?: number,
     selected_block?: string,
+
+    user_id: string,
+    user_color: string,
+
+    conn?: WebSocket,
+    msg_queue?: SocketMessage[],
+    cursors?: {[key: string]: BlockProps},
 };
 
 export enum Command {
     Init,
     Update,
+    Network,
     Delete,
     Archive,
 }
@@ -51,7 +63,6 @@ export enum Command {
 const PUSH_X = 300;
 const OFFSET_XY = 30;
 function GetDefaultState(props: PlayboxProps) {
-
     let state: PlayboxState = { 
         state: PlayboxStates.HYDRATING,
         root_block: props.block,
@@ -60,6 +71,9 @@ function GetDefaultState(props: PlayboxProps) {
         //next_x: OFFSET_XY, 
         //next_y: OFFSET_XY,
         offline: true,
+        user_id: uuid(),
+        user_color: get_random_color(),
+
     };
 
     state.root_block.title = state.root_block.title || "";
@@ -67,7 +81,14 @@ function GetDefaultState(props: PlayboxProps) {
     return state;
 }
 
-
+// tasty copy pasta stack overflow
+export function get_random_color() {
+	function c() {
+		var hex = Math.floor(Math.random() * 256).toString(16);
+		return ("0" + String(hex)).substr(-2); // pad with zero
+	}
+	return "#" + c() + c() + c();
+}
 
 export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
     BlackboardRef = React.createRef<HTMLDivElement>();
@@ -115,7 +136,74 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
         return result;
     }
 
+    async TrySendServer(message: SocketMessage) {
+        if (!this.state.conn || this.state.conn.readyState !== 1) {
+            //todo: enqueue offline mode...
+            return;
+        }
 
+        //do some throttling
+        //need a big old try catch?
+        this.state.conn.send(JSON.stringify(message));
+    }
+
+    // converts to global point space
+	GetGlobalPoint(client_x: number, client_y: number)
+	{
+        if (!this.BlackboardRef.current) return {x: NaN, y:NaN};
+
+		const rel_pos = this.BlackboardRef.current.getBoundingClientRect();
+		const _x = client_x;
+		const _y = client_y; 
+		const x = _x - rel_pos.left;
+		const y = _y - rel_pos.top;
+
+		return {x: x, y: y};
+    }
+
+    ConnCreateWebSocket()
+    {
+        const WS_URL = document.URL.replace('http://', 'ws://').replace('https://', 'wss://');
+        let conn = new WebSocket(WS_URL);
+
+        conn.onopen = () => {
+            console.log('+ WS Connection');
+            let new_state = {...this.state};
+            new_state.state = PlayboxStates.CONNECTED_SERVER;
+            new_state.offline = false; //duplicated?
+            this.setState(new_state);
+
+            const m: SocketMessage = {
+                id: uuid(),
+                command: SocketCommand.SUB,
+                type: SocketCommandType.DOCUMENT,
+                data: { 
+                    id: this.state.root_block.id, 
+                    title: this.state.user_id,
+                    color: this.state.user_color,
+                }
+            }
+            this.TrySendServer(m);
+        };
+
+        conn.onmessage = evt => {
+            this.handleSocketMessage(evt);
+        };
+
+        conn.onclose = () => {
+            console.log("- WS Disconnection");
+            let new_state = {...this.state};
+            new_state.state = PlayboxStates.DISCONNECTED_SERVER;
+            new_state.conn = undefined;
+            this.setState(new_state);
+            setTimeout(this.ConnCreateWebSocket.bind(this), 5000);
+        };
+
+        return conn;
+    }
+
+
+    // oldschool react shit
     async componentDidMount() {
         let new_state = {...this.state};
 
@@ -126,6 +214,8 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
         console.log(new_state);
         delete new_state.blocks[new_state.root_block.id];
 
+        new_state.conn = this.ConnCreateWebSocket();
+
         this.setState(new_state);
 
         //select root block's title
@@ -133,12 +223,22 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
         this.RootBlockTitle.current.focus();
     }
 
+
     handleTitleEdit(event: ContentEditable.ContentEditableEvent) {
         let new_title = event.target.value;
         let state = {...this.state};
         state.root_block.title = new_title;
         this.setState(state);
         this.DehydrateBlock(state.root_block);
+
+        const m: SocketMessage = {
+            id: uuid(),
+            command: SocketCommand.PUB,
+            type: SocketCommandType.DOCUMENT,
+            data: state.root_block 
+        }
+
+        this.TrySendServer(m);
     }
 
     highlightTitle() {
@@ -146,7 +246,6 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
     }
 
     handleAddBlockLink(event: React.MouseEvent) {
-        console.log("Add block");
         event.preventDefault();
 
         let state = {...this.state};
@@ -176,26 +275,144 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
         if (this.SelectedBlock.current !== null) {
             this.SelectedBlock.current.focus();
         }
+
+        const m: SocketMessage = {
+            id: uuid(),
+            command: SocketCommand.PUB,
+            type: SocketCommandType.DOCUMENT,
+            data: new_block, 
+        }
+
+        this.TrySendServer(m);
+    }
+
+    handleSocketMessage(event: MessageEvent) {
+        const message: SocketMessage = JSON.parse(event.data);
+        //console.log(message);
+
+        switch(message.command){
+            case SocketCommand.PUB:
+                switch(message.type) {
+                    case SocketCommandType.SOCIAL:
+                        this.SocketProcessSocial(message);
+                        break;
+                    case SocketCommandType.DOCUMENT:
+                        this.SocketProcessDocument(message);
+                        break;
+                    default:
+                        break;
+                }
+                break;
+
+            case SocketCommand.SUB:
+                //everything old is new again
+                break;
+
+            default:
+                break;
+        } 
+    }
+
+    SocketProcessDocument(message: SocketMessage) {
+        this.handleCommando(message.data, Command.Network);
+    }
+    
+
+    SocketProcessSocial(m: SocketMessage) {
+        if (!m.data.title || !m.data.id) return;
+        let state = {...this.state};
+        if (!state.cursors) state.cursors = {};
+
+        state.cursors[m.data.id] = m.data;
+
+        const e = m.data.title.toLowerCase();
+        switch (e)
+        {
+            case "move":
+                break;
+
+            case "click":
+                break;
+
+            default:
+                break;
+        }
+
+        this.setState(state);
     }
 
     handleClick(event: React.MouseEvent) {
-        console.log("Click");
+        const cursor_pos: Point = this.GetGlobalPoint(event.clientX, event.clientY);
+        const m: SocketMessage = {
+            id: uuid(),
+            command: SocketCommand.PUB,
+            type: SocketCommandType.SOCIAL, 
+            data: { 
+                id: this.state.user_id, 
+                title: "click", 
+                x: cursor_pos.x, 
+                y: cursor_pos.y,
+                color: this.state.user_color,
+            } 
+        }
 
+        this.TrySendServer(m);
+    }
+
+    handleMouseMove(event: React.MouseEvent) {
+        const cursor_pos = this.GetGlobalPoint(event.clientX, event.clientY)
+        const m: SocketMessage = {
+            id: uuid(),
+            command: SocketCommand.PUB,
+            type: SocketCommandType.SOCIAL,
+            data: { 
+                id: this.state.user_id, 
+                title: "move", 
+                x: cursor_pos.x, 
+                y: cursor_pos.y,
+                color: this.state.user_color,
+            } 
+        }
+
+        this.TrySendServer(m);
     }
 
     handleCommando(block: BlockProps, command: Command = Command.Update) {
         //console.log("Commando!");
         let state = {...this.state};
 
+        if (state.root_block.id === block.id) {
+            state.root_block = block;
+
+        }
+        else {
+            state.blocks[block.id] = block;
+        }
+
+        this.DehydrateBlock(block);
+
         switch (command) {
             case Command.Update:
-                state.blocks[block.id] = block;
-                this.DehydrateBlock(block);
+                const m: SocketMessage = {
+                    id: uuid(),
+                    command: SocketCommand.PUB,
+                    type: SocketCommandType.DOCUMENT,
+                    data: block
+                }
+
+                this.TrySendServer(m);
+
+            case Command.Network: //todo verify sender?
             break;
+
+            default:
+                break;
         }
 
         this.setState(state);
     }
+
+    
 
     render() {
         return (
@@ -213,7 +430,12 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
                         <a onClick={this.handleAddBlockLink.bind(this)} href="">+</a>
                     </div>
                     <hr/>
-                    <div ref={this.BlackboardRef} className="Blackboard" onClick={this.handleClick.bind(this)}>
+                    <div 
+                        ref={this.BlackboardRef} 
+                        className="Blackboard" 
+                        onClick={this.handleClick.bind(this)}
+                        onMouseMove={this.handleMouseMove.bind(this)}>
+
                             {Object.entries(this.state.blocks || {}).map(([key, b]) => {
                                 let ref = null;
                                 let selected = false;
@@ -225,6 +447,12 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
                                 }
                                 return <Block innerRef={ref} selected={selected} key={b.id} {...b} commando={this.handleCommando.bind(this)}/>;
                             })}
+
+                            {Object.entries(this.state.cursors || {}).map(([key, b]) => {
+                                return  <Cursor data={b}></Cursor>
+                            })}
+
+
                     </div>
                     {this.props.children}
                 </div>

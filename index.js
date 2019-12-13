@@ -42,13 +42,15 @@ app.get('/', (req, res) => {
 const HttpServer = http.createServer(app);
 const WebSocketServer = new WebSocket.Server({ noServer: true}); 
 
+const UsersDictionary = {};
+
 if (DEBUG) setInterval(
 	function heartbeat() {
 		let client_count = 0;
 		WebSocketServer.clients.forEach(function each(client_) {
 			if (client_.readyState === WebSocket.OPEN) {
 				client_.send(JSON.stringify({heartbeat: Date.now()}));
-				if (DEBUG) console.log(`> Heartbeat... ${++client_count}`);
+				//if (DEBUG) console.log(`> Heartbeat... ${++client_count}`);
 			}
 		})
 	} , 30000);
@@ -61,11 +63,9 @@ WebSocketServer.on('connection', function connection(ws, request) {
 		//if (DEBUG) console.log('+ Got Message');
 		// ! must parse it... can we fail and be insecure with overrun!?
 		const message_json = JSON.parse(message);
-		//if (DEBUG) console.log(message_json);
+		if (DEBUG) console.log(message_json);
 
 		let rebound = message_json;
-		if (!rebound.block) return;
-		rebound.block.server_ack = Date.now();
 
 		WebSocketServer.clients.forEach(function each(client_) {
 			if (client_ !== ws && client_.readyState === WebSocket.OPEN) client_.send(JSON.stringify(rebound));

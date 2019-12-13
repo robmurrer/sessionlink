@@ -71,6 +71,13 @@ export class Block extends React.Component<BlockProps> {
         return (
             <div 
                 className="Block" 
+
+                //style switcher
+                //textedit 
+                //file 
+                //cursor
+                //...
+                //positioning
                 style={{
                     //left: this.props.x, 
                     //top: this.props.y, 
