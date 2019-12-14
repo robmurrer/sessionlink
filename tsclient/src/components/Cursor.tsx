@@ -17,7 +17,7 @@ export class Cursor extends React.Component<CursorProps> {
                     top: this.props.data.y,
                 }
 
-            }>{this.props.data.id} - {this.props.data.title}</aside>
+            }>{this.props.data.id.substring(0,13)}</aside>
         );
     }
 }
