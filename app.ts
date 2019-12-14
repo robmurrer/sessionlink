@@ -1,35 +1,23 @@
 // Session Link Funhouse Server
+// The Typescript Port
 // (c) 2019 Rob Murrer
 // All Rights Reserved.
 // Not Fit For Public Consumption.
 
 const DEBUG = true; //todo: toogle on ship one point oh
 
-const express = require('express');
-const session = require('express-session');
-const http = require('http');
-const path = require('path');
-const WebSocket = require('ws');
-const uuid = require('uuid');
+import express = require('express')
+import session = require('express-session')
+import http = require('http')
+import path = require('path')
+import WebSocket = require('ws')
+import uuid = require('uuid')
+
 const app = express();
-
-const SessionParser = session({
-	secret: (DEBUG ? 'hi mom and dad!' : process.env.SERVER_KEY)
-});
-
-//app.use(SessionParser);
-app.use(express.static(path.join(__dirname, 'tsclient/build')));
-
-app.post('/login', function(req, res) {
-	const id = uuid.v4();
-	//console.log(req.body); todo: need body parser middleware
-	req.session.userId = id;
-	res.send({ result: 'OK', message: 'Session updated' });
-});
-
+const CLIENT = '../tsclient/build';
+app.use(express.static(path.join(__dirname, CLIENT)));
 app.get('/', (req, res) => {
-	//if (DEBUG) console.log(req);
-	res.sendFile(path.join(__dirname+'/tsclient/build/index.html'));
+	res.sendFile(path.join(__dirname+CLIENT+'/index.html'));
 });
 
 // Wishlist server states/commands
@@ -41,8 +29,6 @@ app.get('/', (req, res) => {
 
 const HttpServer = http.createServer(app);
 const WebSocketServer = new WebSocket.Server({ noServer: true}); 
-
-const UsersDictionary = {};
 
 if (DEBUG) setInterval(
 	function heartbeat() {
@@ -62,8 +48,8 @@ WebSocketServer.on('connection', function connection(ws, request) {
 	ws.on('message', function incoming(message) {
 		//if (DEBUG) console.log('+ Got Message');
 		// ! must parse it... can we fail and be insecure with overrun!?
-		const message_json = JSON.parse(message);
-		if (DEBUG) console.log(message_json);
+		const message_json = JSON.parse(message.toString());
+		//if (DEBUG) console.log(message_json);
 
 		let rebound = message_json;
 
@@ -97,6 +83,6 @@ HttpServer.on('upgrade', function(request, socket, head) {
 const port = process.env.PORT || 5000;
 HttpServer.listen(port);
 
-console.log('Funhouse Server Started');
+console.log('Funhouse TS (v2) Server Started');
 console.log('Listening on port: ' + port);
 if (DEBUG) console.log('! In DEBUG mode, not fit for User Consumption');
