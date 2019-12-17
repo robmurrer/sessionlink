@@ -7,13 +7,20 @@
 const DEBUG = true; //todo: toogle on ship one point oh
 
 import express = require('express')
+import bodyParser = require('body-parser');
 import session = require('express-session')
 import http = require('http')
 import path = require('path')
 import WebSocket = require('ws')
 import uuid = require('uuid')
 
+import {BlockProps} from "./tsclient/src/components/Block"
+import {SocketMessage, SocketCommandType, SocketCommand} from "./tsclient/src/components/SocketMessage"
+
 const app = express();
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
+
 const CLIENT = '../tsclient/build';
 app.use(express.static(path.join(__dirname, CLIENT)));
 app.get('/', (req, res) => {
@@ -41,27 +48,61 @@ if (DEBUG) setInterval(
 		})
 	} , 30000);
 
-WebSocketServer.on('connection', function connection(ws, request) {
+interface Channels {
+    users: {[key: string]: WebSocket[]},
+}
+
+const ServerState: Channels = {users:{}};
+
+WebSocketServer.on('connection', function connection(ws, req) {
 	if (DEBUG) console.log('+ Someone connected');
-	//if (DEBUG) console.log(request);
+    //if (DEBUG) console.log(request);
 
-	ws.on('message', function incoming(message) {
-		//if (DEBUG) console.log('+ Got Message');
-		// ! must parse it... can we fail and be insecure with overrun!?
-		const message_json = JSON.parse(message.toString());
-		//if (DEBUG) console.log(message_json);
+	ws.on('message', function incoming(m) {
+		if (!req.url) return;
 
-		let rebound = message_json;
+        const url = new URL("http://www.fake.com" + req.url);
+		const id = url.searchParams.get('id');
 
-		WebSocketServer.clients.forEach(function each(client_) {
-			if (client_ !== ws && client_.readyState === WebSocket.OPEN) client_.send(JSON.stringify(rebound));
+        if (!id) return;
+		if (!ServerState.users) return;
+
+		const message: SocketMessage = JSON.parse(m.toString());
+		switch (message.type) {
+			case SocketCommandType.DOCUMENT:
+				if (message.command === SocketCommand.SUB) {
+					if (ServerState.users[id] === undefined) {
+						ServerState.users[id] = [];
+					}
+					ServerState.users[id].push(ws)
+				}
+				break;
+			case SocketCommandType.SOCIAL:
+				break;
+			default:
+				break;
+		}
+
+		ServerState.users[id].map(s => {
+			if (s === ws) return;
+			if (s.readyState === WebSocket.OPEN) {
+				s.send(JSON.stringify(message))
+			}
 		});
+
+		/* full rebound method:
+		WebSocketServer.clients.forEach(function each(client_) {
+			if (client_ !== ws && client_.readyState === WebSocket.OPEN) {
+                client_.send(JSON.stringify(m));
+            }
+		});
+		*/
 	});
 
 });
 
 
-HttpServer.on('upgrade', function(request, socket, head) {
+HttpServer.on('upgrade', function(req, socket, head) {
 	if (DEBUG) console.log("^ Upgraded Websocket Connection")
 
 	/*
@@ -73,9 +114,9 @@ HttpServer.on('upgrade', function(request, socket, head) {
 	});
 	*/
 
-	WebSocketServer.handleUpgrade(request, socket, head, function(ws) {
+	WebSocketServer.handleUpgrade(req, socket, head, function(ws) {
 		if (DEBUG) console.log('x Upgrading...');
-		WebSocketServer.emit('connection', ws, request);
+		WebSocketServer.emit('connection', ws, req);
 	});
 });
 
