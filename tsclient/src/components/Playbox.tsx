@@ -323,6 +323,8 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
                 break;
         } 
     }
+
+
     SocketProcessSubscribe(message: SocketMessage) {
         const m: SocketMessage = {
             id: uuid(),
@@ -446,6 +448,7 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
     
 
     render() {
+        document.title = this.state.root_block.title + " - Session Link";
         return (
             <FileDrop store={this.state.store}>
                 <div className="Playbox">
