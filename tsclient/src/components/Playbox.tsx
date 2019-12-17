@@ -276,6 +276,15 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
             this.SelectedBlock.current.focus();
         }
 
+        const m2: SocketMessage = {
+            id: uuid(),
+            command: SocketCommand.PUB,
+            type: SocketCommandType.DOCUMENT,
+            data: state.root_block, 
+        }
+
+        this.TrySendServer(m2);
+
         const m: SocketMessage = {
             id: uuid(),
             command: SocketCommand.PUB,
@@ -284,6 +293,8 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
         }
 
         this.TrySendServer(m);
+
+
     }
 
     handleSocketMessage(event: MessageEvent) {
