@@ -305,12 +305,32 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
                 break;
 
             case SocketCommand.SUB:
-                //everything old is new again
+                this.SocketProcessSubscribe(message);
                 break;
 
             default:
                 break;
         } 
+    }
+    SocketProcessSubscribe(message: SocketMessage) {
+        const m: SocketMessage = {
+            id: uuid(),
+            command: SocketCommand.PUB,
+            type: SocketCommandType.DOCUMENT,
+            data: this.state.root_block, 
+        }
+        this.TrySendServer(m);
+
+        if (!this.state.root_block.blocks) return;
+        this.state.root_block.blocks.map( id => {
+            const m: SocketMessage = {
+                id: uuid(),
+                command: SocketCommand.PUB,
+                type: SocketCommandType.DOCUMENT,
+                data: this.state.blocks[id]
+            }
+            this.TrySendServer(m);
+        });
     }
 
     SocketProcessDocument(message: SocketMessage) {
