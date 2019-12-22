@@ -53,7 +53,7 @@ export interface PlayboxState {
 };
 
 export enum Command {
-    Init,
+    Create,
     Update,
     Network,
     Delete,
@@ -416,7 +416,6 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
 
         if (state.root_block.id === block.id) {
             state.root_block = block;
-
         }
         else {
             state.blocks[block.id] = block;
@@ -424,15 +423,30 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
 
         this.DehydrateBlock(block);
 
-        switch (command) {
-            case Command.Update:
-                const m: SocketMessage = {
-                    id: uuid(),
-                    command: SocketCommand.PUB,
-                    type: SocketCommandType.DOCUMENT,
-                    data: block
-                }
+        const m: SocketMessage = {
+            id: uuid(),
+            command: SocketCommand.PUB,
+            type: SocketCommandType.DOCUMENT,
+            data: block
+        }
 
+        const m2: SocketMessage = {
+            id: uuid(),
+            command: SocketCommand.PUB,
+            type: SocketCommandType.DOCUMENT,
+            data: state.root_block
+        }
+
+        switch (command) {
+            case Command.Create:
+                if (!state.root_block.blocks) state.root_block.blocks = [];
+                state.root_block.blocks.push(block.id);
+                this.DehydrateBlock(state.root_block);
+                this.TrySendServer(m2);
+                this.TrySendServer(m);
+                break;
+
+            case Command.Update:
                 this.TrySendServer(m);
 
             case Command.Network: //todo verify sender?
@@ -450,7 +464,7 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
     render() {
         document.title = this.state.root_block.title + " - Session Link";
         return (
-            <FileDrop store={this.state.store}>
+            <FileDrop commando={this.handleCommando.bind(this)}>
                 <div className="Playbox">
                     <h1>
                         <ContentEditable.default 

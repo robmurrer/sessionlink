@@ -2,12 +2,19 @@ import * as React from "react";
 import * as ContentEditable from "react-contenteditable";
 import { Command } from "./Playbox";
 
+export enum BlockTypes {
+    TEXT,
+    FILE,
+}
+
 export interface BlockProps {
     id: string;
     title?: string;
     value?: any;
     created?: number;
     updated?: number;
+
+    type?: BlockTypes;
 
     // Geometry
     x?: number; 
@@ -68,6 +75,22 @@ export class Block extends React.Component<BlockProps> {
         this.props.commando(this.props, Command.Delete)
     }
     render() {
+
+        let cb = <ContentEditable.default 
+                        html={String(this.props.value) || ""} //guard value can be any?
+                        onChange={this.handleValueEdit.bind(this)}
+                        onFocus={this.highlightContent.bind(this)}
+                    />;
+
+        if (this.props.type) {
+            let b64 = this.props.value as string;
+
+            if (b64.startsWith("data:image/")) {
+                cb = <img src={b64} />
+            }
+        }
+
+
         return (
             <div 
                 className="Block" 
@@ -100,11 +123,7 @@ export class Block extends React.Component<BlockProps> {
                 </h1>
                 <hr/>
                 <div className="Content">
-                    <ContentEditable.default 
-                        html={String(this.props.value) || ""} //guard value can be any?
-                        onChange={this.handleValueEdit.bind(this)}
-                        onFocus={this.highlightContent.bind(this)}
-                    />
+                    {cb}
                 </div>
                 <div style={{display: "none"}} className="Controls">
                     <button 
