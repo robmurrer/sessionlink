@@ -36,6 +36,16 @@ export interface BlockProps {
 };
 
 export class Block extends React.Component<BlockProps> {
+    BlockTitle = React.createRef<HTMLElement>();
+    BlockContent = React.createRef<HTMLElement>();
+
+    componentDidMount() {
+        if (this.props.selected) {
+            if (!this.BlockTitle.current) return;
+            this.BlockTitle.current.focus();
+        }
+    }
+
     highlightContent() { 
         setTimeout(() => { document.execCommand('selectAll', false)}, 0);
     }
@@ -50,6 +60,16 @@ export class Block extends React.Component<BlockProps> {
         let dt = event.dataTransfer;
         dt.setData("text/plain", this.props.id);
     }
+
+    handleTitleEnter(event: React.KeyboardEvent) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+
+            if (!this.BlockContent.current) return;
+            this.BlockContent.current.focus();
+        }
+    }
+
 
     handleTitleEdit(event: ContentEditable.ContentEditableEvent) {
         if (!this.props.commando) return;
@@ -75,12 +95,12 @@ export class Block extends React.Component<BlockProps> {
         this.props.commando(this.props, Command.Delete)
     }
     render() {
-
         let cb = <ContentEditable.default 
+                        innerRef={this.BlockContent}
                         html={String(this.props.value) || ""} //guard value can be any?
                         onChange={this.handleValueEdit.bind(this)}
                         onFocus={this.highlightContent.bind(this)}
-                    />;
+                />;
 
         if (this.props.type) {
             let b64 = this.props.value as string;
@@ -90,25 +110,16 @@ export class Block extends React.Component<BlockProps> {
             }
         }
 
-
         return (
             <div 
                 className="Block" 
-
-                //style switcher
-                //textedit 
-                //file 
-                //cursor
-                //...
-                //positioning
                 style={{
                     //left: this.props.x, 
                     //top: this.props.y, 
+                    float: "left",
                     color: this.props.color,
                     border: "1px solid " + this.props.color,
-                    float: "left",
                 }}
-
                 //draggable={true}
                 onClick={this.handleClick.bind(this)}
                 onDragStart={this.handleDragStart.bind(this)}
@@ -116,9 +127,11 @@ export class Block extends React.Component<BlockProps> {
             >
                 <h1>
                     <ContentEditable.default 
+                        innerRef={this.BlockTitle}
                         html={String(this.props.title || "")} 
                         onChange={this.handleTitleEdit.bind(this)} 
                         onFocus={this.highlightContent.bind(this)}
+                        onKeyDown={this.handleTitleEnter.bind(this)}
                     />
                 </h1>
                 <hr/>

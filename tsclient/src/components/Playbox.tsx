@@ -223,31 +223,21 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
         this.RootBlockTitle.current.focus();
     }
 
-
-    handleTitleEdit(event: ContentEditable.ContentEditableEvent) {
-        let new_title = event.target.value;
-        let state = {...this.state};
-        state.root_block.title = new_title;
-        this.setState(state);
-        this.DehydrateBlock(state.root_block);
-
-        const m: SocketMessage = {
-            id: uuid(),
-            command: SocketCommand.PUB,
-            type: SocketCommandType.DOCUMENT,
-            data: state.root_block 
+    handleTitleEditEnter(event: React.KeyboardEvent) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            if (this.state.root_block.blocks && this.state.root_block.blocks.length === 0) {
+                this.handleAddBlockLink_();
+                return;
+            }
+            let state = {...this.state};
+            if (!state.root_block.blocks || state.root_block.blocks.length === 0) return;
+            state.selected_block = state.root_block.blocks[0];
+            this.setState(state);
         }
+    } 
 
-        this.TrySendServer(m);
-    }
-
-    highlightTitle() {
-        setTimeout(() => { document.execCommand('selectAll', false)}, 0);
-    }
-
-    handleAddBlockLink(event: React.MouseEvent) {
-        event.preventDefault();
-
+    handleAddBlockLink_() {
         let state = {...this.state};
 
         let new_block: BlockProps = {
@@ -272,10 +262,6 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
         this.DehydrateBlock(new_block);
         this.DehydrateBlock(state.root_block)
 
-        if (this.SelectedBlock.current !== null) {
-            this.SelectedBlock.current.focus();
-        }
-
         const m2: SocketMessage = {
             id: uuid(),
             command: SocketCommand.PUB,
@@ -293,14 +279,37 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
         }
 
         this.TrySendServer(m);
+    }
 
+    handleTitleEdit(event: ContentEditable.ContentEditableEvent) {
+        let new_title = event.target.value;
+        let state = {...this.state};
+        state.root_block.title = new_title;
+        this.setState(state);
+        this.DehydrateBlock(state.root_block);
 
+        const m: SocketMessage = {
+            id: uuid(),
+            command: SocketCommand.PUB,
+            type: SocketCommandType.DOCUMENT,
+            data: state.root_block 
+        }
+
+        this.TrySendServer(m);
+    }
+
+    highlightTitle() {
+        setTimeout(() => { document.execCommand('selectAll', false)}, 0);
+    }
+
+    handleAddBlockLink(event: React.MouseEvent) {
+        event.preventDefault();
+        this.handleAddBlockLink_()
     }
 
     handleSocketMessage(event: MessageEvent) {
         const message: SocketMessage = JSON.parse(event.data);
         //console.log(message);
-
         switch(message.command){
             case SocketCommand.PUB:
                 switch(message.type) {
@@ -472,6 +481,7 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
                             html={this.state.root_block.title || ""}
                             onChange={this.handleTitleEdit.bind(this)} 
                             onFocus={this.highlightTitle.bind(this)}
+                            onKeyDown={this.handleTitleEditEnter.bind(this)}
                         />
                     </h1>
                     <div className="Plusbar">
