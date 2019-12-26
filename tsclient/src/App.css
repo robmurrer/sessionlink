@@ -53,6 +53,12 @@ html, body, #root, .App {
   margin:0;
 }
 
+.Block img {
+  max-width:100%;
+  max-height:100%;
+}
+
+
 .Block .Content {
   padding-bottom:30px;
 }

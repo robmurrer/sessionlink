@@ -1,6 +1,8 @@
 import * as React from "react";
 import * as ContentEditable from "react-contenteditable";
 import { Command } from "./Playbox";
+import * as DOMPurify from "dompurify";
+import * as Marked from "marked";
 
 export enum BlockTypes {
     TEXT,
@@ -97,6 +99,8 @@ export class Block extends React.Component<BlockProps> {
     render() {
         let cb = <ContentEditable.default 
                         innerRef={this.BlockContent}
+                        //html={DOMPurify.sanitize(Marked.parse(String(this.props.value))) || ""} //guard value can be any?
+                        //html={Marked.parse(String(this.props.value)) || ""} //guard value can be any?
                         html={String(this.props.value) || ""} //guard value can be any?
                         onChange={this.handleValueEdit.bind(this)}
                         onFocus={this.highlightContent.bind(this)}
@@ -107,6 +111,9 @@ export class Block extends React.Component<BlockProps> {
 
             if (b64.startsWith("data:image/")) {
                 cb = <img src={b64} />
+            }
+            else {
+                cb = <a href={b64}>{this.props.title}</a>
             }
         }
 
