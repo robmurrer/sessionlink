@@ -44,8 +44,7 @@ html, body, #root, .App {
 
 .Block {
   padding: 10px;
-  background-color: black;
-  max-width: 900px;
+  max-width: 666px;
   font-size: 18px;
 }
 

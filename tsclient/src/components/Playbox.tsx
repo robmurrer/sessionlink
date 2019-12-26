@@ -420,7 +420,6 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
     }
 
     handleCommando(block: BlockProps, command: Command = Command.Update) {
-        //console.log("Commando!");
         let state = {...this.state};
 
         if (state.root_block.id === block.id) {
@@ -430,16 +429,14 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
             state.blocks[block.id] = block;
         }
 
-        this.DehydrateBlock(block);
-
-        const m: SocketMessage = {
+        const block_message: SocketMessage = {
             id: uuid(),
             command: SocketCommand.PUB,
             type: SocketCommandType.DOCUMENT,
             data: block
         }
 
-        const m2: SocketMessage = {
+        const root_block_message: SocketMessage = {
             id: uuid(),
             command: SocketCommand.PUB,
             type: SocketCommandType.DOCUMENT,
@@ -451,14 +448,19 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
                 if (!state.root_block.blocks) state.root_block.blocks = [];
                 state.root_block.blocks.push(block.id);
                 this.DehydrateBlock(state.root_block);
-                this.TrySendServer(m2);
-                this.TrySendServer(m);
+                this.DehydrateBlock(block);
+                this.TrySendServer(root_block_message);
+                this.TrySendServer(block_message);
                 break;
 
             case Command.Update:
-                this.TrySendServer(m);
+                this.TrySendServer(block_message);
+                this.DehydrateBlock(block);
 
             case Command.Network: //todo verify sender?
+                //check contents of block compared to what we have in store
+                //switch on this
+                this.DehydrateBlock(block);
             break;
 
             default:
@@ -494,7 +496,7 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
                         onClick={this.handleClick.bind(this)}
                         onMouseMove={this.handleMouseMove.bind(this)}>
 
-                            {Object.entries(this.state.blocks || {}).map(([key, b]) => {
+                            {Object.entries(this.state.blocks || {}).reverse().map(([key, b]) => {
                                 let ref = null;
                                 let selected = false;
                                 if (this.state.selected_block !== null) {
