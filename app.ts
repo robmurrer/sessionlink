@@ -21,6 +21,15 @@ const app = express();
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
+function requireHTTPS(req: express.Request, res: express.Response, next: express.NextFunction) {
+	// The 'x-forwarded-proto' check is for Heroku
+	if (!req.secure && req.get('x-forwarded-proto') !== 'https' && process.env.NODE_ENV !== "development") {
+	  return res.redirect('https://' + req.get('host') + req.url);
+	}
+	next();
+}
+app.use(requireHTTPS);
+
 const CLIENT = '../tsclient/build';
 app.use(express.static(path.join(__dirname, CLIENT)));
 app.get('/', (req, res) => {
