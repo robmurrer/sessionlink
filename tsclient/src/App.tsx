@@ -1,9 +1,9 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { Playbox } from './components/Playbox';
-import { BlockProps } from './components/Block';
+import { PlayBlock } from './components/PlayBlock';
 import uuid from 'uuid/v4';
+import { Commando } from './Commando';
 
 const App: React.FC = () => {
 
@@ -15,16 +15,11 @@ const App: React.FC = () => {
     window.location.href = window.location.href + "?id=" + id;
   }
 
-  let b0: BlockProps = {
-    id: id, 
-    title: "hi mom, hi dad!",
-    value: "Love you jess",
-  };
-
+  const commando = new Commando(id)
 
   return (
     <div className="App"> 
-      <Playbox block={b0}></Playbox>
+      <PlayBlock id={id} commando={commando}/>
     </div>
   );
 }

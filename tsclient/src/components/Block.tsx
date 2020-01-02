@@ -32,19 +32,23 @@ export interface BlockProps {
     //blocks under management
     blocks?: string[],
 
+    mdshallow?: string, //no contents of children
+    mddeep?: string, //full contents of entire tree
+
     innerRef?: React.RefObject<HTMLElement> | Function | null;
 
     selected?: boolean;
 };
 
 export class Block extends React.Component<BlockProps> {
-    BlockTitle = React.createRef<HTMLElement>();
-    BlockContent = React.createRef<HTMLElement>();
+    //BlockRef = React.createRef<HTMLElement>(); //can't use?
+    BlockTitleRef = React.createRef<HTMLElement>();
+    BlockContentRef = React.createRef<HTMLElement>();
 
     componentDidMount() {
         if (this.props.selected) {
-            if (!this.BlockTitle.current) return;
-            this.BlockTitle.current.focus();
+            if (!this.BlockTitleRef.current) return;
+            this.BlockTitleRef.current.focus();
         }
     }
 
@@ -67,8 +71,8 @@ export class Block extends React.Component<BlockProps> {
         if (event.keyCode === 13) {
             event.preventDefault();
 
-            if (!this.BlockContent.current) return;
-            this.BlockContent.current.focus();
+            if (!this.BlockContentRef.current) return;
+            this.BlockContentRef.current.focus();
         }
     }
 
@@ -98,7 +102,7 @@ export class Block extends React.Component<BlockProps> {
     }
     render() {
         let cb = <ContentEditable.default 
-                        innerRef={this.BlockContent}
+                        innerRef={this.BlockContentRef}
                         //html={DOMPurify.sanitize(Marked.parse(String(this.props.value))) || ""} //guard value can be any?
                         //html={Marked.parse(String(this.props.value)) || ""} //guard value can be any?
                         html={String(this.props.value) || ""} //guard value can be any?
@@ -119,6 +123,7 @@ export class Block extends React.Component<BlockProps> {
 
         return (
             <div 
+                //innerRef={this.BlockRef}
                 className="Block" 
                 style={{
                     //left: this.props.x, 
@@ -134,7 +139,7 @@ export class Block extends React.Component<BlockProps> {
             >
                 <h1>
                     <ContentEditable.default 
-                        innerRef={this.BlockTitle}
+                        innerRef={this.BlockTitleRef}
                         html={String(this.props.title || "")} 
                         onChange={this.handleTitleEdit.bind(this)} 
                         onFocus={this.highlightContent.bind(this)}

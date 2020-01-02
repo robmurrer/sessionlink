@@ -210,10 +210,6 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
         new_state.blocks = await this.HydrateBlock(new_state.root_block.id);
         new_state.root_block = new_state.blocks[new_state.root_block.id];
 
-        //remove root block from blockchain!
-        console.log(new_state);
-        delete new_state.blocks[new_state.root_block.id];
-
         new_state.conn = this.ConnCreateWebSocket();
 
         this.setState(new_state);
@@ -474,6 +470,10 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
 
     render() {
         document.title = this.state.root_block.title + " - Session Link";
+
+        let no_root_block = {...this.state.blocks};
+        delete no_root_block[this.state.root_block.id];
+
         return (
             <FileDrop commando={this.handleCommando.bind(this)}>
                 <div className="Playbox">
@@ -496,7 +496,7 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
                         onClick={this.handleClick.bind(this)}
                         onMouseMove={this.handleMouseMove.bind(this)}>
 
-                            {Object.entries(this.state.blocks || {}).reverse().map(([key, b]) => {
+                            {Object.entries(no_root_block|| {}).reverse().map(([key, b]) => {
                                 let ref = null;
                                 let selected = false;
                                 if (this.state.selected_block !== null) {

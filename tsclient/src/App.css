@@ -11,7 +11,7 @@ html, body, #root, .App {
   height: 100%;
 }
 
-.Playbox h1 {
+.Playbox h1, .Block h1 {
   float:left;
   margin: 0;
   padding: 0;
@@ -21,7 +21,7 @@ html, body, #root, .App {
 }
 
 
-.Playbox .Plusbar {
+.Playbox .Plusbar, .Block .Plusbar{
   float:left;
   border-left: 1px solid white;
   margin-left: 10px;
@@ -31,14 +31,14 @@ html, body, #root, .App {
   margin-top: 5px;
 }
 
-.Plusbar a {
+.Plusbar a, .Block a{
   color: lightskyblue;
   text-decoration: none; 
   display:block;
   margin-top: -5px;
 }
 
-.Playbox hr {
+.Playbox hr, .Block hr {
   clear: both;
 }
 

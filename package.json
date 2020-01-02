@@ -12,10 +12,12 @@
     "heroku-postbuild": "cd tsclient && npm install && npm run build"
   },
   "dependencies": {
+    "@types/aws-sdk": "^2.7.0",
     "@types/express": "^4.17.2",
     "@types/express-session": "^1.15.16",
     "@types/uuid": "^3.4.6",
     "@types/ws": "^6.0.4",
+    "aws-sdk": "^2.596.0",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "express": "~4.16.0",
