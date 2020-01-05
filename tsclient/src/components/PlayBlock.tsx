@@ -1,9 +1,9 @@
 import * as React from "react";
 import * as ContentEditable from "react-contenteditable";
-import { Command } from "./Playbox";
 import { Commando } from "../Commando";
 import uuid from "uuid";
 import assert from "assert";
+import { getBase64 } from "../File";
 
 export enum PlayBlockType {
     GHOST,
@@ -13,7 +13,7 @@ export enum PlayBlockType {
 
 export interface PlayBlockProps {
     id: string
-    commando: Commando 
+    commando: Commando
 };
 
 export interface PlayBlockState {
@@ -33,11 +33,9 @@ export interface PlayBlockState {
     h?: number
 
     color?: string
-    selected?: boolean
 
     blocks?: string[]
     md_shallow?: string 
-    md_deep?: string 
 }
 
 export class PlayBlock extends React.Component<PlayBlockProps, PlayBlockState> {
@@ -50,8 +48,8 @@ export class PlayBlock extends React.Component<PlayBlockProps, PlayBlockState> {
 
         this.setState(hydro)
 
-        if (hydro.selected) {
-            if (!this.BlockTitleRef.current) return
+        if (!this.BlockTitleRef.current) return
+        if (this.props.commando.selected_block_id === this.props.id) {
             this.BlockTitleRef.current.focus()
         }
     }
@@ -60,9 +58,7 @@ export class PlayBlock extends React.Component<PlayBlockProps, PlayBlockState> {
         setTimeout(() => { document.execCommand('selectAll', false)}, 0)
     }
 
-    //we don't want Playbox to add another block at cursor click
     handleClick(event : React.MouseEvent) {
-        event.stopPropagation()
     }
 
     // place block id in drag data transfer for playbox to update
@@ -81,33 +77,29 @@ export class PlayBlock extends React.Component<PlayBlockProps, PlayBlockState> {
     }
 
 
-    handleTitleEdit(event: ContentEditable.ContentEditableEvent) {
+    async handleTitleEdit(event: ContentEditable.ContentEditableEvent) {
         let updated_block = {...this.state}
         updated_block.title = event.target.value
-        this.props.commando.Dehydrate(updated_block)
-        this.setState(updated_block);
+        const s = await this.props.commando.Dehydrate(updated_block)
+        this.setState(s)
     }
 
-    handleValueEdit(event: ContentEditable.ContentEditableEvent) {
+    async handleValueEdit(event: ContentEditable.ContentEditableEvent) {
         let updated_block = {...this.state}
         updated_block.value = event.target.value
-        this.props.commando.Dehydrate(updated_block)
-        this.setState(updated_block)
+        const s = await this.props.commando.Dehydrate(updated_block)
+        this.setState(s)
     }
 
     async handleAddBlockLink(event: React.MouseEvent) {
         event.preventDefault()
         const new_block_id = uuid()
-        let new_block = await this.props.commando.Hydrate(new_block_id)
-        new_block = this.props.commando.Dehydrate(new_block)
+        const new_block = await this.props.commando.Hydrate(new_block_id)
+        const parent = await this.props.commando.AddBlock(new_block, this.props.id)
 
-        let root_block = {...this.state}
-
-        if (!root_block.blocks) root_block.blocks = []
-        root_block.blocks.push(new_block_id)
-        root_block = this.props.commando.Dehydrate(root_block)
-        this.setState(root_block)
+        this.setState(parent)
     }
+
 
     handleArchive(event: React.MouseEvent) {
     }
@@ -115,59 +107,103 @@ export class PlayBlock extends React.Component<PlayBlockProps, PlayBlockState> {
     handleDelete(event: React.MouseEvent) {
     }
 
-    render() {
-        if (!this.state) return null
+    /*
+    shouldComponentUpdate(nextProps: Readonly<PlayBlockProps>, nextState: Readonly<PlayBlockState>) {
+            return true
+    }
+    */
 
+    async dropHandler(event: React.DragEvent) {
+        event.preventDefault();
+        // console.log("dragHandler");
+        if (!event.dataTransfer.items) return;
+
+        for (let i=0; i<event.dataTransfer.items.length; i++) {
+            let item = event.dataTransfer.items[i]
+            //console.log(item);
+            if (item.kind !== "file") continue
+
+            let f = item.getAsFile()
+            if (!f) return
+
+            getBase64(f).then(async data => { 
+                if (!f) return
+
+                const new_block_id = uuid()
+                let new_block = await this.props.commando.Hydrate(new_block_id)
+                new_block.title = f.name
+                new_block.type = PlayBlockType.FILE
+                new_block.value = data
+
+                const parent = await this.props.commando.AddBlock(new_block, this.props.id)
+                this.setState(parent)
+            })
+        }
+
+        event.stopPropagation()
+    }
+
+    dragOverHandler(event: React.DragEvent) {
+        //console.log("dragOver");
+        event.preventDefault()
+    }
+
+    render() {
+        let s = {...this.state}
         let cb = <ContentEditable.default 
                         innerRef={this.BlockContentRef}
                         //html={DOMPurify.sanitize(Marked.parse(String(this.props.value))) || ""} //guard value can be any?
                         //html={Marked.parse(String(this.props.value)) || ""} //guard value can be any?
-                        html={String(this.state.value || "")} //guard value can be any?
+                        html={String(s.value || "")} //guard value can be any?
                         onChange={this.handleValueEdit.bind(this)}
                         onFocus={this.highlightContent.bind(this)}
                 />
 
-        if (this.state.type) {
-            let b64 = this.state.value as string;
+        if (s.type) {
+            let b64 = s.value as string;
 
             if (b64.startsWith("data:image/")) {
                 cb = <img src={b64} />
             }
             else {
-                cb = <a href={b64}>{this.state.title}</a>
+                cb = <a href={b64}>{s.title}</a>
             }
         }
 
         let children: string[] = []
-        if (this.state.blocks) children = this.state.blocks.slice()
+        if (s.blocks) children = s.blocks.slice()
         children = children.reverse()
 
+        let styles: React.CSSProperties =  {
+                   //left: this.props.x, 
+                    //top: this.props.y, 
+                    float: "left",
+                    color: s.color,
+                    //border: (this.props.id === this.props.commando.selected_block_id ? "1px solid " + this.state.color : ""),
+                    maxWidth: (s.id === this.props.commando.block_id ? "100%" : "666px")
+                }
         return (
             <div 
                 className="Block" 
-                style={{
-                    //left: this.props.x, 
-                    //top: this.props.y, 
-                    float: "left",
-                    color: this.state.color,
-                    border: "1px solid white"
-                }}
+                style={styles}
                 //draggable={true}
                 onClick={this.handleClick.bind(this)}
                 onDragStart={this.handleDragStart.bind(this)}
                 onFocus={this.highlightContent.bind(this)}
+                onDrop={this.dropHandler.bind(this)}
+                onDragOver={this.dragOverHandler.bind(this)}
             >
                 <h1>
                     <ContentEditable.default 
                         innerRef={this.BlockTitleRef}
-                        html={String(this.state.title || "")} 
+                        html={String(s.title || "")} 
                         onChange={this.handleTitleEdit.bind(this)} 
                         onFocus={this.highlightContent.bind(this)}
                         onKeyDown={this.handleTitleEnter.bind(this)}
                     />
                 </h1>
                     <div className="Plusbar">
-                        <a onClick={this.handleAddBlockLink.bind(this)} href="">+</a>
+                        <a style={{color: s.color}} onClick={this.handleAddBlockLink.bind(this)} href="">+</a>
                     </div>
                 <hr/>
                 <div className="Content">
@@ -193,6 +229,6 @@ export class PlayBlock extends React.Component<PlayBlockProps, PlayBlockState> {
 
                 {this.props.children}
             </div>
-        );
+        )
     }
 }
