@@ -42,6 +42,17 @@ export class PlayBlock extends React.Component<PlayBlockProps, PlayBlockState> {
     BlockTitleRef = React.createRef<HTMLElement>()
     BlockContentRef = React.createRef<HTMLElement>()
 
+    constructor(props: PlayBlockProps) {
+        super(props)
+        if (this.props.commando.block_id === this.props.id) {
+            this.props.commando.root_block_callback = this.ExternalUpdate.bind(this)
+        }
+    }
+
+    async ExternalUpdate() {
+        console.log("External Update!")
+    }
+
     async componentDidMount() {
         let hydro = await this.props.commando.Hydrate(this.props.id)
         assert(hydro)
@@ -180,7 +191,9 @@ export class PlayBlock extends React.Component<PlayBlockProps, PlayBlockState> {
                     float: "left",
                     color: s.color,
                     //border: (this.props.id === this.props.commando.selected_block_id ? "1px solid " + this.state.color : ""),
-                    maxWidth: (s.id === this.props.commando.block_id ? "100%" : "666px")
+                    maxWidth: (s.id === this.props.commando.block_id ? "100%" : "666px"),
+                    width: (s.id === this.props.commando.block_id ? "100%" : undefined),
+                    height: (s.id === this.props.commando.block_id ? "100%" : undefined)
                 }
         return (
             <div 
