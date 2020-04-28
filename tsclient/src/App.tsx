@@ -4,6 +4,7 @@ import './App.css';
 import { PlayBlock } from './components/PlayBlock';
 import uuid from 'uuid/v4';
 import { Commando } from './Commando';
+import { User } from './User';
 
 const App: React.FC = () => {
 
@@ -16,10 +17,11 @@ const App: React.FC = () => {
   }
 
   const commando = new Commando(id)
+  const user = User.Create(); 
 
   return (
     <div className="App"> 
-      <PlayBlock id={id} commando={commando}/>
+      <PlayBlock id={id} user={user} commando={commando}/>
     </div>
   );
 }

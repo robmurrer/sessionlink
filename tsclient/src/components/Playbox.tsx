@@ -13,7 +13,7 @@ import { FileDrop, } from "./FileDrop"
 import { Block, BlockProps } from "./Block"
 import { Cursor } from "./Cursor"
 
-import { SocketMessage, SocketCommand, SocketCommandType } from "./SocketMessage"
+import { SocketMessage_LEGACY, SocketCommand, SocketCommandType } from "./SocketMessage"
 
 export interface PlayboxProps {
     block: BlockProps,
@@ -48,7 +48,7 @@ export interface PlayboxState {
     user_color: string,
 
     conn?: WebSocket,
-    msg_queue?: SocketMessage[],
+    msg_queue?: SocketMessage_LEGACY[],
     cursors?: {[key: string]: BlockProps},
 };
 
@@ -136,7 +136,7 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
         return result;
     }
 
-    async TrySendServer(message: SocketMessage) {
+    async TrySendServer(message: SocketMessage_LEGACY) {
         if (!this.state.conn || this.state.conn.readyState !== 1) {
             //todo: enqueue offline mode...
             return;
@@ -173,7 +173,7 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
             new_state.offline = false; //duplicated?
             this.setState(new_state);
 
-            const m: SocketMessage = {
+            const m: SocketMessage_LEGACY = {
                 id: uuid(),
                 command: SocketCommand.SUB,
                 type: SocketCommandType.DOCUMENT,
@@ -258,7 +258,7 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
         this.DehydrateBlock(new_block);
         this.DehydrateBlock(state.root_block)
 
-        const m2: SocketMessage = {
+        const m2: SocketMessage_LEGACY = {
             id: uuid(),
             command: SocketCommand.PUB,
             type: SocketCommandType.DOCUMENT,
@@ -267,7 +267,7 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
 
         this.TrySendServer(m2);
 
-        const m: SocketMessage = {
+        const m: SocketMessage_LEGACY = {
             id: uuid(),
             command: SocketCommand.PUB,
             type: SocketCommandType.DOCUMENT,
@@ -284,7 +284,7 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
         this.setState(state);
         this.DehydrateBlock(state.root_block);
 
-        const m: SocketMessage = {
+        const m: SocketMessage_LEGACY = {
             id: uuid(),
             command: SocketCommand.PUB,
             type: SocketCommandType.DOCUMENT,
@@ -304,7 +304,7 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
     }
 
     handleSocketMessage(event: MessageEvent) {
-        const message: SocketMessage = JSON.parse(event.data);
+        const message: SocketMessage_LEGACY = JSON.parse(event.data);
         //console.log(message);
         switch(message.command){
             case SocketCommand.PUB:
@@ -330,8 +330,8 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
     }
 
 
-    SocketProcessSubscribe(message: SocketMessage) {
-        const m: SocketMessage = {
+    SocketProcessSubscribe(message: SocketMessage_LEGACY) {
+        const m: SocketMessage_LEGACY = {
             id: uuid(),
             command: SocketCommand.PUB,
             type: SocketCommandType.DOCUMENT,
@@ -341,7 +341,7 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
 
         if (!this.state.root_block.blocks) return;
         this.state.root_block.blocks.map( id => {
-            const m: SocketMessage = {
+            const m: SocketMessage_LEGACY = {
                 id: uuid(),
                 command: SocketCommand.PUB,
                 type: SocketCommandType.DOCUMENT,
@@ -351,12 +351,12 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
         });
     }
 
-    SocketProcessDocument(message: SocketMessage) {
+    SocketProcessDocument(message: SocketMessage_LEGACY) {
         this.handleCommando(message.data, Command.Network);
     }
     
 
-    SocketProcessSocial(m: SocketMessage) {
+    SocketProcessSocial(m: SocketMessage_LEGACY) {
         if (!m.data.title || !m.data.id) return;
         let state = {...this.state};
         if (!state.cursors) state.cursors = {};
@@ -381,7 +381,7 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
 
     handleClick(event: React.MouseEvent) {
         const cursor_pos: Point = this.GetGlobalPoint(event.clientX, event.clientY);
-        const m: SocketMessage = {
+        const m: SocketMessage_LEGACY = {
             id: uuid(),
             command: SocketCommand.PUB,
             type: SocketCommandType.SOCIAL, 
@@ -399,7 +399,7 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
 
     handleMouseMove(event: React.MouseEvent) {
         const cursor_pos = this.GetGlobalPoint(event.clientX, event.clientY)
-        const m: SocketMessage = {
+        const m: SocketMessage_LEGACY = {
             id: uuid(),
             command: SocketCommand.PUB,
             type: SocketCommandType.SOCIAL,
@@ -425,14 +425,14 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
             state.blocks[block.id] = block;
         }
 
-        const block_message: SocketMessage = {
+        const block_message: SocketMessage_LEGACY = {
             id: uuid(),
             command: SocketCommand.PUB,
             type: SocketCommandType.DOCUMENT,
             data: block
         }
 
-        const root_block_message: SocketMessage = {
+        const root_block_message: SocketMessage_LEGACY = {
             id: uuid(),
             command: SocketCommand.PUB,
             type: SocketCommandType.DOCUMENT,

@@ -1,9 +1,11 @@
 import {BlockProps} from "./Block"
+import { PlayBlockProps, PlayBlockState } from "./PlayBlock";
 
-//publish/subscribe
 export enum SocketCommand {
     PUB,
+    UNPUB,
     SUB,
+    UNSUB,
 }
 
 export enum SocketCommandType {
@@ -12,9 +14,15 @@ export enum SocketCommandType {
 }
 
 export interface SocketMessage {
-    id: string,
-    command: SocketCommand,
-    type: SocketCommandType,
-    data: BlockProps 
+    id: string
+    command: SocketCommand
+    type: SocketCommandType
+    data: PlayBlockState 
 }
 
+export interface SocketMessage_LEGACY {
+    id: string
+    command: SocketCommand
+    type: SocketCommandType
+    data: BlockProps 
+}

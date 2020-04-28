@@ -2,18 +2,24 @@ import * as React from "react";
 import * as ContentEditable from "react-contenteditable";
 import { Commando } from "../Commando";
 import uuid from "uuid";
-import assert from "assert";
 import { getBase64 } from "../File";
+import { SocketCommand, SocketCommandType, SocketMessage } from "./SocketMessage";
+import { User } from "../User";
 
 export enum PlayBlockType {
     GHOST,
+    STOMPED,
     TEXT,
-    FILE,
+    FILE, //CSV to DATATABLE...
+    LIST,
+    TABLE,
+    CALENDAR,
 }
 
 export interface PlayBlockProps {
     id: string
     commando: Commando
+    user: User
 };
 
 export interface PlayBlockState {
@@ -21,9 +27,7 @@ export interface PlayBlockState {
     type?: PlayBlockType
     title?: string
     value?: any
-
-    created?: number
-    updated?: number
+    url?: string
 
     // Geometry
     x?: number 
@@ -31,11 +35,9 @@ export interface PlayBlockState {
     z?: number 
     w?: number
     h?: number
-
     color?: string
 
     blocks?: string[]
-    md_shallow?: string 
 }
 
 export class PlayBlock extends React.Component<PlayBlockProps, PlayBlockState> {
@@ -44,23 +46,22 @@ export class PlayBlock extends React.Component<PlayBlockProps, PlayBlockState> {
 
     constructor(props: PlayBlockProps) {
         super(props)
-        if (this.props.commando.block_id === this.props.id) {
-            this.props.commando.root_block_callback = this.ExternalUpdate.bind(this)
+        if (this.props.commando._block_id === this.props.id) {
+            this.props.commando._root_block_callback = this.ExternalUpdate.bind(this)
         }
     }
 
-    async ExternalUpdate() {
-        console.log("External Update!")
+    async ExternalUpdate(message: SocketMessage) {
+        console.log(message)
     }
 
     async componentDidMount() {
         let hydro = await this.props.commando.Hydrate(this.props.id)
-        assert(hydro)
 
         this.setState(hydro)
 
         if (!this.BlockTitleRef.current) return
-        if (this.props.commando.selected_block_id === this.props.id) {
+        if (this.props.commando._selected_block_id === this.props.id) {
             this.BlockTitleRef.current.focus()
         }
     }
@@ -109,6 +110,23 @@ export class PlayBlock extends React.Component<PlayBlockProps, PlayBlockState> {
         const parent = await this.props.commando.AddBlock(new_block, this.props.id)
 
         this.setState(parent)
+    }
+
+    async handleMouseMove(event: React.MouseEvent) {
+        const m: SocketMessage = {
+            id: uuid(),
+            command: SocketCommand.PUB,
+            type: SocketCommandType.SOCIAL,
+            data: {
+                id: this.props.user.GetId() || "boom",  
+                title: this.props.user.GetNick(),
+                color: this.props.user.GetColor(),
+                value: "CursorMove",
+                x: event.clientX,
+                y: event.clientY,
+            }
+        }
+        await this.props.commando.TrySendServer(m)
     }
 
 
@@ -171,7 +189,7 @@ export class PlayBlock extends React.Component<PlayBlockProps, PlayBlockState> {
                 />
 
         if (s.type) {
-            let b64 = s.value as string;
+            let b64 = s.value as string
 
             if (b64.startsWith("data:image/")) {
                 cb = <img src={b64} />
@@ -191,9 +209,9 @@ export class PlayBlock extends React.Component<PlayBlockProps, PlayBlockState> {
                     float: "left",
                     color: s.color,
                     //border: (this.props.id === this.props.commando.selected_block_id ? "1px solid " + this.state.color : ""),
-                    maxWidth: (s.id === this.props.commando.block_id ? "100%" : "666px"),
-                    width: (s.id === this.props.commando.block_id ? "100%" : undefined),
-                    height: (s.id === this.props.commando.block_id ? "100%" : undefined)
+                    maxWidth: (s.id === this.props.commando._block_id ? "100%" : "666px"),
+                    width: (s.id === this.props.commando._block_id ? "100%" : undefined),
+                    height: (s.id === this.props.commando._block_id ? "100%" : undefined)
                 }
         return (
             <div 
@@ -205,7 +223,9 @@ export class PlayBlock extends React.Component<PlayBlockProps, PlayBlockState> {
                 onFocus={this.highlightContent.bind(this)}
                 onDrop={this.dropHandler.bind(this)}
                 onDragOver={this.dragOverHandler.bind(this)}
+                onMouseMove={this.handleMouseMove.bind(this)}
             >
+                
                 <h1>
                     <ContentEditable.default 
                         innerRef={this.BlockTitleRef}
@@ -223,7 +243,7 @@ export class PlayBlock extends React.Component<PlayBlockProps, PlayBlockState> {
                     {cb}
                 </div>
                 <div className="Children">
-                    {children.map(id => {return <PlayBlock key={id} id={id} commando={this.props.commando} />})}
+                    {children.map(id => {return <PlayBlock key={id} id={id} user={this.props.user} commando={this.props.commando} />})}
                 </div>
                 <div style={{display: "none"}} className="Controls">
                     <button 
