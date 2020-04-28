@@ -3,7 +3,9 @@ A Collaborative Kit (Alpha AF)
 
 BSD Licensed
 
-<a href="https://sessionlink.herokuapp.com">https://sessionlink.herokuapp.com</a>
+Demo: <a href="https://sessionlink.herokuapp.com">https://sessionlink.herokuapp.com</a>
+
+Open same generated link in multiple clients to see the real-time collaborative nature of the beast.
 
 See the 1.0 branch for what is running on server.
 
