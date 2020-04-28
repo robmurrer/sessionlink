@@ -7,6 +7,8 @@ Demo: <a href="https://sessionlink.herokuapp.com">https://sessionlink.herokuapp.
 
 Open same generated link in multiple clients to see the real-time collaborative nature of the beast.
 
+It may take some time to spin up the free-tier of heroku...
+
 See the 1.0 branch for what is running on server.
 
 ## Hierarchy Refactor
