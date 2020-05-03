@@ -515,7 +515,7 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
                             })}
 
 
-                    <div className="QRBox"><QRCode value={document.URL}></QRCode></div>
+                    <div className="QRCode"><QRCode value={document.URL}></QRCode></div>
                     </div>
                     {this.props.children}
                 </div>

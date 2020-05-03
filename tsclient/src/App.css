@@ -66,6 +66,12 @@ html, body, #root, .App {
   color: white;
 }
 
+.QRCode {
+  float: left;
+  background-color: white;
+  padding: 5px;
+  margin:0;
+}
 /* hack for safari content editing :( */
 [contenteditable] {
     -webkit-user-select: text;
