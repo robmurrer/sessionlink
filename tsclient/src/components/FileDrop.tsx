@@ -15,6 +15,21 @@ export class FileDrop extends React.Component<FileDropProps> {
         super(props)
     }
 
+    async pasteHandler(event: any) {
+        let new_event = {...event}
+        new_event.dataTransfer = {}
+        new_event.preventDefault = () => {}
+        new_event.dataTransfer.items = (event.clipboardData || event.originalEvent.clipboardData).items
+
+        if (new_event.dataTransfer.items.length === 1 && new_event.dataTransfer.items[0].type === "text") {
+            event.preventDefault()
+            return
+        }
+
+        this.dropHandler(new_event); //what are you doing with your life?
+    }
+
+
     async dropHandler(event: React.DragEvent) {
         event.preventDefault()
         if (!event.dataTransfer.items) return
@@ -83,6 +98,7 @@ export class FileDrop extends React.Component<FileDropProps> {
                 className="fileDrop"
                 onDrop={this.dropHandler.bind(this)}
                 onDragOver={this.dragOverHandler.bind(this)}
+                onPaste={this.pasteHandler.bind(this)}
             >
                 {this.props.children}
             </div>

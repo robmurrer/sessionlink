@@ -515,9 +515,12 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
                             })}
 
 
-                    <div className="QRCode"><QRCode value={document.URL}></QRCode></div>
                     </div>
                     {this.props.children}
+                    
+
+                    <h3>Scan QRCode</h3>
+                    <div className="QRCode"><QRCode value={document.URL}></QRCode></div>
                 </div>
             </FileDrop>
         );
