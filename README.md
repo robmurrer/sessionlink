@@ -1,22 +1,20 @@
 # Session Link
-A Collaborative Kit (Alpha AF)
-
-BSD Licensed
-
-Demo: <a href="https://sessionlink.herokuapp.com">https://sessionlink.herokuapp.com</a>
+* A Collaborative Kit (Alpha AF)
+* BSD Licensed
+* Demo: <a href="https://sessionlink.cryptide.com">https://sessionlink.cryptide.com</a>
 
 Open same generated link in multiple clients to see the real-time collaborative nature of the beast.
 
-It may take some time to spin up the free-tier of heroku...
+## Architecture
 
-See the 1.0 branch for what is running on server.
+<img src="https://app.diagrams.net/?lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=SessionLink_1#R3VrbcuI4EP2aPIbylctjIMlsqphNKmw2O09bsi2MJsZiZTnAfv22sGxkSSRkgVCTmSoitXU93TrqbvvCH81X3xhazL7TBGcXnpOsLvzrC88b9AL4FYJ1JfBcv19JUkaSSuZuBRPyL5ZCR0pLkuCi1ZBTmnGyaAtjmuc45i0ZYowu282mNGvPukApNgSTGGWm9JkkfFZJ%2B15vK%2F8Nk3RWz%2Bx2B9WTOaoby50UM5TQpSLyby78EaOUV6X5aoQzAV6NS9XvdsfTZmEM53yfDlGX3uSLfx6ff0ZZQv78TvLfF5dhNcorykq54dsyn9GywBdeN4NxhxGDUipKE8xeMZOb4esaIZgFlAGVIexwIYRxRkuYdLicEY4nCxQL4RLsA2QzPs%2Bg5kJRTo0Zx6ude3IbpMDEMJ1jztbQRHbwfAmuNK%2FLrqwvt7pyawXMFD31pQxJ80ibobcIQkGC%2BAFAewagzzgCwVCYokBPR3VMwdigwYRTJmxRh7cBdZ2RPIER3sU1oiU0TMZRI0DxS8qE9L7kMAo%2BngJ8t62AIDQV0Pc6oakB1z2VCgaGCr493V3vBhaxzzFWV8PKtRhr32KrrnMqpGoWU09zAvQnq5TxGU1pjrKbrXTIKvOC5w7Utm3GlC4kWD8x52vJ5ajk1AalmOhtIGFdtGQxfmMDrmNHnOEMcfLansAGn%2Bz6QAlMvZNW%2FJ6mAY5YirnspSmhWcb%2F10ttKIoJPxUW6q1NuJxnVzHwB4ArLJQAo4xRhLMHWhBOaA5NIso5nUODTDwYNowwopnoB6P5080%2FZYyrjKSiL6faYaAVjYyaO9c50gnxwzbugXlCfMsJ6Z7qgLieoQjzxOTJlXA0NhcfKgoSt8HCK8L%2FEhgBC1a1HxIxUb5eqZW1UnnAjMAuBONXshx2pAwkqj%2FqOURlO9SmtlZr%2BmBHP4Pglm3OxHu8bOpe0W1o0W0tO%2FBIB0HbtAybqfZpHGmTG5x3Bjo1N5gu24hhxMFJ9m4fMUoK4eYyOOue8%2FQ4Nh0OOPEZKYAVLh9xQQqOxDr1RncJ2AGZEgvpwPHmbQsvOKMvuGaSnAoHYzglWaaJkOSTGMbGzEI0c5IkmzvGdhm3751D2KbWXM%2FiLHYtJqiz%2F%2FHoxfQW96MX0Brj%2B7HOLs4Jww%2BSjuurrON0er0zE89gT94Jz8k7%2FkBz%2BnRj2pd3gkAbyPtk3ukbtnq%2FwDlIIMCZ0PgFi8WiPBGxTBkVMSMR3kTr8GN1wH99IqmzHG3NeKFJK7YY9HS0YkZAJq00UfvpAx9%2F0ESA67bDpkAU2CDyT%2BbZeaaLPVkiNv%2B6Vhr2dS1Y7r%2FAogSdaI6ng75plr9U%2BOkFdsQPvTPCNqE0SZVPonrfP4de1PimFeA4nUFTP5Or4QWH%2BRofMwhw7NBaabAQii5224s36LYvoK6WCf5YeyhUKziqUdUQKoR7kxCxqmsal3MsTVk1OmuaYUpzriQt4P%2BtWMUwZSghePtMknCbrNUOKmOr2Y8EFbPGjt9Np9hzJQb1K3YuNiAPgevVdblpMSUqFtVup2Ql1tGk1eerVLxj6aBlEXQYroz2LhbrGUK1KrVb4VdYwN%2FVb4SKzXBHuEo8zRf1ffMmsQVSJ7vNfTMonuCNKzqaoTwVsbEe4d5v3mWozutXvfh1bXmWrNqn3vt%2B19DWkEaGAr5adjPo6Q6Y55ia%2BNT8pm8mIACWePdbqK%2Bii66j68I%2Fuy7MANt0ww5MBnXg5lfyQZ3e0bLQW5%2FM7qEd0RkL9%2FTF3LMmnPXET2NMByd%2B9HfXp44GzGzCH8zmrn05juhpwJ%2F7bVTgWrycQqTyQTgm%2BQv8cTswu3PFYuFZxLxkb3xRgLIMsHs%2FBbRQOEB2UmjhqFCf4LsNqG4%2FsqkOxfZTJf%2FmPw%3D%3D">
 
 ## Hierarchy Refactor
 Currently working on a hierarchical refactor from hell and it isn't working just yet...
 Stand by
 
-## Development
-* npm/yarn install in both root and tsclient directories
-* set/export NODE_ENV=development
-* npm/yarn start
+## Development Setup
+* `npm install` in both root and tsclient directories
+* `export NODE_ENV=development`
+* `npm start` in root directory
 
