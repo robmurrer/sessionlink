@@ -15,6 +15,8 @@ import { Cursor } from "./Cursor"
 
 import { SocketMessage_LEGACY, SocketCommand, SocketCommandType } from "./SocketMessage"
 
+let QRCode = require("qrcode.react")
+
 export interface PlayboxProps {
     block: BlockProps,
 };
@@ -513,6 +515,7 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
                             })}
 
 
+                    <div className="QRBox"><QRCode value={document.URL}></QRCode></div>
                     </div>
                     {this.props.children}
                 </div>
