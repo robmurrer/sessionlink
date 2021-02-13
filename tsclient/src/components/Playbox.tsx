@@ -12,6 +12,7 @@ import * as localForage from "localforage"
 import { FileDrop, } from "./FileDrop"
 import { Block, BlockProps } from "./Block"
 import { Cursor } from "./Cursor"
+import { Switch, Flex, Box, Spacer, Stack } from "@chakra-ui/react"
 
 import { SocketMessage_LEGACY, SocketCommand, SocketCommandType } from "./SocketMessage"
 
@@ -479,18 +480,27 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
         return (
             <FileDrop commando={this.handleCommando.bind(this)}>
                 <div className="Playbox">
-                    <h1>
-                        <ContentEditable.default 
-                            innerRef={this.RootBlockTitle}
-                            html={this.state.root_block.title || ""}
-                            onChange={this.handleTitleEdit.bind(this)} 
-                            onFocus={this.highlightTitle.bind(this)}
-                            onKeyDown={this.handleTitleEditEnter.bind(this)}
-                        />
-                    </h1>
-                    <div className="Plusbar">
-                        <a onClick={this.handleAddBlockLink.bind(this)} href="">+</a>
-                    </div>
+                    <Flex>
+                        <Box>
+                            <h1>
+                                <ContentEditable.default
+                                    innerRef={this.RootBlockTitle}
+                                    html={this.state.root_block.title || ""}
+                                    onChange={this.handleTitleEdit.bind(this)}
+                                    onFocus={this.highlightTitle.bind(this)}
+                                    onKeyDown={this.handleTitleEditEnter.bind(this)}
+                                />
+                            </h1>
+                            <div className="Plusbar">
+                                <a onClick={this.handleAddBlockLink.bind(this)} href="">+</a>
+                            </div>
+                        </Box>
+                        <Spacer />
+                        <Stack align="center" direction="row">
+                            <small>It's a little dark in here.</small>
+                            <Switch size="md" />
+                        </Stack>
+                    </Flex>
                     <hr/>
                     <div 
                         ref={this.BlackboardRef} 
