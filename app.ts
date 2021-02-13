@@ -30,7 +30,7 @@ function requireHTTPS(req: express.Request, res: express.Response, next: express
 }
 app.use(requireHTTPS);
 
-const CLIENT = '../tsclient/build';
+let CLIENT = '../tsclient/build';
 app.use(express.static(path.join(__dirname, CLIENT)));
 app.get('/', (req, res) => {
 	res.sendFile(path.join(__dirname+CLIENT+'/index.html'));
