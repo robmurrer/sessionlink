@@ -11,6 +11,7 @@ import { Playbox }  from './components/Playbox'
 //new
 import { Commando } from './Commando'
 import { User } from './User'
+import { ChakraProvider } from "@chakra-ui/react";
 
 const App: React.FC = () => {
   const url = new URL(document.URL);
@@ -30,9 +31,11 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="App">
-      <Playbox block={b0}></Playbox>
-    </div>
+    <ChakraProvider>
+      <div className="App">
+        <Playbox block={b0}></Playbox>
+      </div>
+    </ChakraProvider>
   )
 }
 /*
