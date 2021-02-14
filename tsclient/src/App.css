@@ -5,6 +5,11 @@ html, body, #root, .App {
   color:var(--color);
 }
 
+#root {
+  background-color: black;
+  color: white;
+}
+
 .Playbox, .Blackboard {
   position: relative;
   width: 100%;
@@ -59,7 +64,6 @@ html, body, #root, .App {
   max-width:100%;
   max-height:100%;
 }
-
 
 .Block .Content {
   padding-bottom:30px;

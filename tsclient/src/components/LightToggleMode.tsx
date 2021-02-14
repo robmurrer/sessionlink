@@ -8,7 +8,6 @@ const LightToggleMode = () => {
     const [isLight, setIsLight] = useState(localStorage.getItem("theme") === "light");
 
     useEffect(() => {
-        localStorage.setItem("theme", "dark")
         document
             .getElementsByTagName("HTML")[0]
             .setAttribute("data-theme", localStorage.getItem("theme") as string)
