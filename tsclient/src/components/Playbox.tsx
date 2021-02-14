@@ -12,9 +12,10 @@ import * as localForage from "localforage"
 import { FileDrop, } from "./FileDrop"
 import { Block, BlockProps } from "./Block"
 import { Cursor } from "./Cursor"
-import { Switch, Flex, Box, Spacer, Stack } from "@chakra-ui/react"
+import { Flex, Box, Spacer } from "@chakra-ui/react"
 
 import { SocketMessage_LEGACY, SocketCommand, SocketCommandType } from "./SocketMessage"
+import LightToggleMode from "./LightToggleMode";
 
 let QRCode = require("qrcode.react")
 
@@ -480,7 +481,7 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
         return (
             <FileDrop commando={this.handleCommando.bind(this)}>
                 <div className="Playbox">
-                    <Flex>
+                    <Flex mr={3}>
                         <Box>
                             <h1>
                                 <ContentEditable.default
@@ -496,10 +497,7 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
                             </div>
                         </Box>
                         <Spacer />
-                        <Stack align="center" direction="row">
-                            <small>It's a little dark in here.</small>
-                            <Switch size="md" />
-                        </Stack>
+                        <LightToggleMode />
                     </Flex>
                     <hr/>
                     <div 

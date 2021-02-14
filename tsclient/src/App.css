@@ -1,8 +1,8 @@
 html, body, #root, .App {
   height: 100%;
   width: 100%;
-  background-color: black;
-  color: white;
+  background-color: var(--background-color);
+  color:var(--color);
 }
 
 .Playbox, .Blackboard {
@@ -63,7 +63,6 @@ html, body, #root, .App {
 
 .Block .Content {
   padding-bottom:30px;
-  color: white;
 }
 
 .QRCode {
