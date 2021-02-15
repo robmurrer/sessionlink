@@ -1,6 +1,11 @@
 html, body, #root, .App {
   height: 100%;
   width: 100%;
+  background-color: var(--background-color);
+  color:var(--color);
+}
+
+.chakra-ui-light {
   background-color: black;
   color: white;
 }
@@ -19,14 +24,14 @@ html, body, #root, .App {
   font-size: 30px;
 }
 
-
 .Playbox .Plusbar, .Block .Plusbar{
   float:left;
-  border-left: 1px solid white;
+  border-left: 1px solid var(--color);
   margin-left: 10px;
   padding-left: 10px;
-  font-size: 30px;
-  line-height: 30px;
+  font-size: 35px;
+  line-height: 37px; 
+  height: 35px;
   margin-top: 5px;
 }
 
@@ -60,10 +65,8 @@ html, body, #root, .App {
   max-height:100%;
 }
 
-
 .Block .Content {
   padding-bottom:30px;
-  color: white;
 }
 
 .QRCode {

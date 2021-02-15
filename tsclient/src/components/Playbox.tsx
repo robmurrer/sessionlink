@@ -12,8 +12,10 @@ import * as localForage from "localforage"
 import { FileDrop, } from "./FileDrop"
 import { Block, BlockProps } from "./Block"
 import { Cursor } from "./Cursor"
+import { Flex, Box, Spacer } from "@chakra-ui/react"
 
 import { SocketMessage_LEGACY, SocketCommand, SocketCommandType } from "./SocketMessage"
+import LightToggleMode from "./LightToggleMode";
 
 let QRCode = require("qrcode.react")
 
@@ -479,18 +481,24 @@ export class Playbox extends React.Component<PlayboxProps, PlayboxState> {
         return (
             <FileDrop commando={this.handleCommando.bind(this)}>
                 <div className="Playbox">
-                    <h1>
-                        <ContentEditable.default 
-                            innerRef={this.RootBlockTitle}
-                            html={this.state.root_block.title || ""}
-                            onChange={this.handleTitleEdit.bind(this)} 
-                            onFocus={this.highlightTitle.bind(this)}
-                            onKeyDown={this.handleTitleEditEnter.bind(this)}
-                        />
-                    </h1>
-                    <div className="Plusbar">
-                        <a onClick={this.handleAddBlockLink.bind(this)} href="">+</a>
-                    </div>
+                    <Flex mr={3}>
+                        <Box>
+                            <h1>
+                                <ContentEditable.default
+                                    innerRef={this.RootBlockTitle}
+                                    html={this.state.root_block.title || ""}
+                                    onChange={this.handleTitleEdit.bind(this)}
+                                    onFocus={this.highlightTitle.bind(this)}
+                                    onKeyDown={this.handleTitleEditEnter.bind(this)}
+                                />
+                            </h1>
+                            <div className="Plusbar">
+                                <a onClick={this.handleAddBlockLink.bind(this)} href="">+</a>
+                            </div>
+                        </Box>
+                        <Spacer />
+                        <LightToggleMode />
+                    </Flex>
                     <hr/>
                     <div 
                         ref={this.BlackboardRef} 
