@@ -14,8 +14,7 @@ import path = require('path')
 import WebSocket = require('ws')
 import uuid = require('uuid')
 
-import {BlockProps} from "./tsclient/src/components/Block"
-import {SocketMessage, SocketCommandType, SocketCommand} from "./tsclient/src/components/SocketMessage"
+import {SocketMessage, SocketCommandType, SocketCommand} from "../tsclient/src/components/SocketMessage"
 
 const app = express();
 app.use(bodyParser.urlencoded({extended: false}));
@@ -30,7 +29,7 @@ function requireHTTPS(req: express.Request, res: express.Response, next: express
 }
 app.use(requireHTTPS);
 
-let CLIENT = '../tsclient/build';
+let CLIENT = '../../tsclient/build';
 app.use(express.static(path.join(__dirname, CLIENT)));
 app.get('/', (req, res) => {
 	res.sendFile(path.join(__dirname+CLIENT+'/index.html'));

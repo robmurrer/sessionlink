@@ -5,16 +5,9 @@ import uuid from "uuid";
 import { getBase64 } from "../File";
 import { SocketCommand, SocketCommandType, SocketMessage } from "./SocketMessage";
 import { User } from "../User";
+import { PlayBlockState, PlayBlockType } from "./ISessionLink";
 
-export enum PlayBlockType {
-    GHOST,
-    STOMPED,
-    TEXT,
-    FILE, //CSV to DATATABLE...
-    LIST,
-    TABLE,
-    CALENDAR,
-}
+
 
 export interface PlayBlockProps {
     id: string
@@ -22,23 +15,6 @@ export interface PlayBlockProps {
     user: User
 };
 
-export interface PlayBlockState {
-    id: string
-    type?: PlayBlockType
-    title?: string
-    value?: any
-    url?: string
-
-    // Geometry
-    x?: number 
-    y?: number 
-    z?: number 
-    w?: number
-    h?: number
-    color?: string
-
-    blocks?: string[]
-}
 
 export class PlayBlock extends React.Component<PlayBlockProps, PlayBlockState> {
     BlockTitleRef = React.createRef<HTMLElement>()

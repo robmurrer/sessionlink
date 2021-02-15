@@ -1,5 +1,5 @@
 import * as React from "react"
-import { BlockProps, BlockTypes } from "./Block"
+import { BlockProps, BlockTypes } from "./ISessionLink"
 import uuid from "uuid"
 import { Command } from "./Playbox"
 

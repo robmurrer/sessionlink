@@ -9,7 +9,7 @@ import { PlayBlock } from './components/PlayBlock';
 import uuid from 'uuid/v4';
 
 //old
-import { BlockProps }  from './components/Block'
+import { BlockProps }  from './components/ISessionLink'
 import { Playbox }  from './components/Playbox'
 
 //new

@@ -1,5 +1,5 @@
 import * as React from "react"
-import {PlayBlockState, PlayBlockType} from "./PlayBlock"
+import {PlayBlockState, PlayBlockType} from "./ISessionLink"
 import {Commando} from  "../Commando"
 import uuid from "uuid";
 
