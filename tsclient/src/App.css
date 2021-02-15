@@ -24,14 +24,14 @@ html, body, #root, .App {
   font-size: 30px;
 }
 
-
 .Playbox .Plusbar, .Block .Plusbar{
   float:left;
-  border-left: 1px solid white;
+  border-left: 1px solid var(--color);
   margin-left: 10px;
   padding-left: 10px;
-  font-size: 30px;
-  line-height: 30px;
+  font-size: 35px;
+  line-height: 37px; 
+  height: 35px;
   margin-top: 5px;
 }
 
