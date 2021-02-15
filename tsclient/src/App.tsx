@@ -4,6 +4,7 @@ import './App.css';
 import './dark-theme.css'
 import './light-theme.css'
 import { extendTheme } from "@chakra-ui/react"
+import { ChakraProvider } from "@chakra-ui/react";
 import { PlayBlock } from './components/PlayBlock';
 import uuid from 'uuid/v4';
 
@@ -14,7 +15,7 @@ import { Playbox }  from './components/Playbox'
 //new
 import { Commando } from './Commando'
 import { User } from './User'
-import { ChakraProvider } from "@chakra-ui/react";
+
 
 const App: React.FC = () => {
   const url = new URL(document.URL);

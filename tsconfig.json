@@ -65,6 +65,6 @@
   },
 
   "exclude": [
-    "tsclient",
+    "../tsclient",
   ]
 }
