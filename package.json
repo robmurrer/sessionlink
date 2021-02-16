@@ -6,9 +6,10 @@
     "node": "11"
   },
   "scripts": {
-    "start": "tsc && cd ../build && node --optimize_for_size --max_old_space_size=460 app.js",
+    "build": "tsc",
+    "start": "node --optimize_for_size --max_old_space_size=460 ./build/src/app.js",
     "client": "cd tsclient && npm run start && cd ..",
-    "heroku-postbuild": "npm install && cd tsclient && npm install && npm run build"
+    "heroku-postbuild": "npm install && cd tsclient && npm install && npm run build && cd .. && npm run build "
   },
   "dependencies": {
     "@types/aws-sdk": "^2.7.0",

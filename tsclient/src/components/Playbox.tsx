@@ -10,12 +10,13 @@ import uuid from "uuid"
 import * as localForage from "localforage"
 
 import { FileDrop, } from "./FileDrop"
-import { Block, BlockProps } from "./Block"
+import { Block } from "./Block"
 import { Cursor } from "./Cursor"
 import { Flex, Box, Spacer } from "@chakra-ui/react"
 
 import { SocketMessage_LEGACY, SocketCommand, SocketCommandType } from "./SocketMessage"
 import LightToggleMode from "./LightToggleMode";
+import { BlockProps } from "./ISessionLink"
 
 let QRCode = require("qrcode.react")
 

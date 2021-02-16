@@ -12,7 +12,7 @@
     "@types/crypto-js": "^3.1.43",
     "@types/dompurify": "^2.0.1",
     "@types/fs-capacitor": "^2.0.0",
-    "@types/jest": "24.0.18",
+    "@types/jest": "^24.0.18",
     "@types/marked": "^0.7.2",
     "@types/node": "12.7.8",
     "@types/qrcode.react": "^1.0.0",
@@ -34,6 +34,7 @@
     "typescript": "^3.8.0"
   },
   "scripts": {
+    "tsc": "tsc",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

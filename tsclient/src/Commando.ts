@@ -3,7 +3,7 @@ import sha256 from "crypto-js/sha256"
 import Base64 from "crypto-js/enc-base64"
 import uuid from "uuid"
 
-import { PlayBlockState, PlayBlockType } from "./components/PlayBlock"
+import { PlayBlockState, PlayBlockType } from "./components/ISessionLink"
 import { SocketCommand, SocketCommandType, SocketMessage } from "./components/SocketMessage"
 
 export interface DeltaLink {

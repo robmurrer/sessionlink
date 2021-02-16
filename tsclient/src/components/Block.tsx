@@ -1,44 +1,7 @@
-import * as React from "react";
-import * as ContentEditable from "react-contenteditable";
-import { Command } from "./Playbox";
-import * as DOMPurify from "dompurify";
-import * as Marked from "marked";
-
-export enum BlockTypes {
-    TEXT,
-    FILE,
-}
-
-export interface BlockProps {
-    id: string;
-    title?: string;
-    value?: any;
-    created?: number;
-    updated?: number;
-
-    type?: BlockTypes;
-
-    // Geometry
-    x?: number; 
-    y?: number; 
-    z?: number; 
-
-    // Colors
-    color?: string;
-
-    // Update callback :)
-    commando?: Function,
-
-    //blocks under management
-    blocks?: string[],
-
-    mdshallow?: string, //no contents of children
-    mddeep?: string, //full contents of entire tree
-
-    innerRef?: React.RefObject<HTMLElement> | Function | null;
-
-    selected?: boolean;
-};
+import * as React from "react"
+import * as ContentEditable from "react-contenteditable"
+import { Command } from "./Playbox"
+import {BlockProps} from "./ISessionLink"
 
 export class Block extends React.Component<BlockProps> {
     //BlockRef = React.createRef<HTMLElement>(); //can't use?

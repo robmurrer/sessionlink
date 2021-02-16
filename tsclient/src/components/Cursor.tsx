@@ -1,6 +1,5 @@
 import * as React from "react"
-import {BlockProps} from "./Block"
-import { blockStatement } from "@babel/types";
+import {BlockProps} from "./ISessionLink"
 
 export interface CursorProps {
     data: BlockProps

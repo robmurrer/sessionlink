@@ -45,11 +45,11 @@ export async function downscaleImage(
         console.log('need to resize...');
 
         // Calculate new dimensions
-        const newSize = longestDimension == 'width'
+        const newSize = longestDimension === 'width'
             ? Math.floor(oldHeight / oldWidth * resolution)
             : Math.floor(oldWidth / oldHeight * resolution);
-        const newWidth = longestDimension == 'width' ? resolution : newSize;
-        const newHeight = longestDimension == 'height' ? resolution : newSize;
+        const newWidth = longestDimension === 'width' ? resolution : newSize;
+        const newHeight = longestDimension === 'height' ? resolution : newSize;
         console.log('new width / height', newWidth, newHeight);
 
         // Create a temporary canvas to draw the downscaled image on.

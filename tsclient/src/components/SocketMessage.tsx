@@ -1,5 +1,4 @@
-import {BlockProps} from "./Block"
-import { PlayBlockProps, PlayBlockState } from "./PlayBlock";
+import {BlockProps, PlayBlockState} from "./ISessionLink"
 
 export enum SocketCommand {
     PUB,
