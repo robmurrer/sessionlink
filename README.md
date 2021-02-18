@@ -1,7 +1,7 @@
 # Session Link
 * A Collaborative Editor Kit (Alpha AF)
 * TypeScript + React + WebSockets
-* BSD Licensed
+* Not Licenced for External Use
 * Demo: <a href="https://sessionlink.cryptide.com">https://sessionlink.cryptide.com</a>
 
 Open same generated link in multiple clients to see the real-time collaborative nature of the beast.
